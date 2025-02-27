@@ -91,7 +91,27 @@ Input Model → [Stage 1] → [Stage 2] → ... → [Stage N] → Optimized Mode
  - More complex than simple argparse-based configuration                                                                                                                               
  - Requires understanding of Hydra's configuration system                                                                                                                              
                                                                                                                                                                                        
- ### 4. Optimization Techniques                                                                                                                                                        
+ ### 4. Optimization Techniques   
+
+
+
+  #### Prompt Optimization (`prompt_optimization.py`)                                                                                                                                   
+                                                                                                                                                                                       
+ Implements various prompt optimization techniques using DSPy:                                                                                                                         
+ - Bootstrap few-shot learning                                                                                                                                                         
+ - Bootstrap with random search                                                                                                                                                        
+ - Chain-of-thought prompting                                                                                                                                                          
+                                                                                                                                                                                       
+ **Design Decisions**:                                                                                                                                                                 
+ - Integration with Stanford's DSPy framework for state-of-the-art prompt optimization                                                                                                 
+ - Support for different tasks (QA, summarization, classification)                                                                                                                     
+ - Compatibility with both local models and API-based models                                                                                                                           
+                                                                                                                                                                                       
+ **Trade-offs**:                                                                                                                                                                       
+ - May require API access for best results with larger models                                                                                                                          
+ - Optimization quality depends on the quality and diversity of training examples                                                                                                      
+ - Additional dependency on the DSPy framework                                                                                                                                         
+                                                                                                                                                                                                     
                                                                                                                                                                                        
  #### Fine-tuning (`fine_tuning.py`)                                                                                                                                                   
                                                                                                                                                                                        

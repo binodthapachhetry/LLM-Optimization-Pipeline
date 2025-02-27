@@ -1,0 +1,33 @@
+model:                                                                                                                                                                                
+name: "gpt2"  # Can also be "openai/gpt-3.5-turbo" for API-based models                                                                                                             
+pretrained: true                                                                                                                                                                    
+                                                                                                                                                                                    
+pipeline:                                                                                                                                                                             
+stages:                                                                                                                                                                             
+    - prompt_optimization                                                                                                                                                             
+    - evaluation                                                                                                                                                                      
+                                                                                                                                                                                    
+prompt_optimization:                                                                                                                                                                  
+method: "bootstrap_few_shot"  # Options: bootstrap_few_shot, bootstrap_random_search, chain_of_thought                                                                              
+task: "qa"  # Options: qa, summarization, classification                                                                                                                            
+dataset_name: "squad"                                                                                                                                                               
+dataset_config: null                                                                                                                                                                
+train_split: "train"                                                                                                                                                                
+eval_split: "validation"                                                                                                                                                            
+max_train_examples: 100                                                                                                                                                             
+max_eval_examples: 50                                                                                                                                                               
+num_bootstrapping_examples: 3                                                                                                                                                       
+num_candidates: 5  # For random search                                                                                                                                              
+output_dir: "./outputs/prompt_optimized"                                                                                                                                            
+                                                                                                                                                                                    
+# For API-based models                                                                                                                                                              
+openai_api_key: null  # Will use environment variable if not specified                                                                                                              
+                                                                                                                                                                                    
+evaluation:                                                                                                                                                                           
+evaluate_perplexity: false                                                                                                                                                          
+evaluate_tasks: true                                                                                                                                                                
+tasks: ["qa"]                                                                                                                                                                       
+max_samples: 100                                                                                                                                                                    
+                                                                                                                                                                                    
+output_dir: "./outputs/prompt_optimization"                                                                                                                                           
+debug: false

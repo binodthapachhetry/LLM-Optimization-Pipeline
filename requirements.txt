@@ -7,7 +7,8 @@ peft==0.4.0
 bitsandbytes==0.40.2                                                                                                                                                                  
 optimum==1.8.7                                                                                                                                                                        
 onnx==1.14.0                                                                                                                                                                          
-onnxruntime==1.15.1                                                                                                                                                                   
+onnxruntime==1.15.1  
+dspy-ai==2.6.7                                                                                                                                                                 
                                                                                                                                                                                     
 # Evaluation and metrics                                                                                                                                                              
 evaluate==0.4.0                                                                                                                                                                       

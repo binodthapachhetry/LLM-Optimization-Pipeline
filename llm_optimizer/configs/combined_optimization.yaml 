@@ -1,0 +1,56 @@
+model:                                                                                                                                                                                
+name: "gpt2"                                                                                                                                                                        
+pretrained: true                                                                                                                                                                    
+                                                                                                                                                                                    
+pipeline:                                                                                                                                                                             
+stages:                                                                                                                                                                             
+    - fine_tuning                                                                                                                                                                     
+    - quantization                                                                                                                                                                    
+    - prompt_optimization                                                                                                                                                             
+    - evaluation                                                                                                                                                                      
+    - benchmarking                                                                                                                                                                    
+                                                                                                                                                                                    
+fine_tuning:                                                                                                                                                                          
+method: "lora"                                                                                                                                                                      
+dataset: "wikitext"                                                                                                                                                                 
+dataset_config: "wikitext-2-raw-v1"                                                                                                                                                 
+num_epochs: 3                                                                                                                                                                       
+batch_size: 4                                                                                                                                                                       
+gradient_accumulation_steps: 4                                                                                                                                                      
+learning_rate: 5e-5                                                                                                                                                                 
+weight_decay: 0.01                                                                                                                                                                  
+warmup_steps: 500                                                                                                                                                                   
+max_length: 512                                                                                                                                                                     
+lora_r: 16                                                                                                                                                                          
+lora_alpha: 32                                                                                                                                                                      
+lora_target_modules: ["q_proj", "v_proj"]                                                                                                                                           
+lora_dropout: 0.05                                                                                                                                                                  
+                                                                                                                                                                                    
+quantization:                                                                                                                                                                         
+method: "int8"                                                                                                                                                                      
+                                                                                                                                                                                    
+prompt_optimization:                                                                                                                                                                  
+method: "bootstrap_few_shot"                                                                                                                                                        
+task: "qa"                                                                                                                                                                          
+dataset_name: "squad"                                                                                                                                                               
+max_train_examples: 100                                                                                                                                                             
+max_eval_examples: 50                                                                                                                                                               
+num_bootstrapping_examples: 3                                                                                                                                                       
+                                                                                                                                                                                    
+evaluation:                                                                                                                                                                           
+evaluate_perplexity: true                                                                                                                                                           
+evaluate_tasks: true                                                                                                                                                                
+evaluate_efficiency: true                                                                                                                                                           
+evaluate_memory: true                                                                                                                                                               
+tasks: ["qa"]                                                                                                                                                                       
+max_samples: 100                                                                                                                                                                    
+                                                                                                                                                                                    
+benchmarking:                                                                                                                                                                         
+baseline_model: "gpt2"                                                                                                                                                              
+sequence_lengths: [128, 512]                                                                                                                                                        
+batch_sizes: [1, 4]                                                                                                                                                                 
+num_iterations: 10                                                                                                                                                                  
+benchmark_quality: true                                                                                                                                                             
+                                                                                                                                                                                    
+output_dir: "./outputs/combined_optimization"                                                                                                                                         
+debug: false  

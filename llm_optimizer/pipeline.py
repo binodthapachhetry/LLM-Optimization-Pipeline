@@ -15,7 +15,8 @@ from llm_optimizer.pruning import PruningStage
 from llm_optimizer.distillation import DistillationStage                                                                                                                              
 from llm_optimizer.evaluation import EvaluationStage                                                                                                                                  
 from llm_optimizer.onnx_conversion import ONNXConversionStage                                                                                                                         
-from llm_optimizer.benchmarking import BenchmarkingStage                                                                                                                              
+from llm_optimizer.benchmarking import BenchmarkingStage
+from llm_optimizer.prompt_optimization import PromptOptimizationStage                                                                                                                        
                                                                                                                                                                                     
 logger = logging.getLogger(__name__)                                                                                                                                                  
                                                                                                                                                                                     
@@ -36,7 +37,8 @@ class OptimizationPipeline:
         "distillation": DistillationStage,                                                                                                                                            
         "evaluation": EvaluationStage,                                                                                                                                                
         "onnx_conversion": ONNXConversionStage,                                                                                                                                       
-        "benchmarking": BenchmarkingStage,                                                                                                                                            
+        "benchmarking": BenchmarkingStage,  
+        "prompt_optimization": PromptOptimizationStage,                                                                                                                                          
     }                                                                                                                                                                                 
                                                                                                                                                                                     
     def __init__(self, config: DictConfig):                                                                                                                                           
