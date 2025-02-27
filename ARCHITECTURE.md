@@ -36,19 +36,7 @@ Input Model → [Stage 1] → [Stage 2] → ... → [Stage N] → Optimized Mode
  - Easy addition of new techniques                                                                                                                                                     
  - Isolation of concerns between different optimization methods                                                                                                                        
                                                                                                                                                                                        
- ### Component Diagram                                                                                                                                                                 
-                                                                                                                                                                                       
-
-┌─────────────────────────────────────────────────────────────┐ │                      CLI Interface                          │                                                        
-└───────────────────────────────┬─────────────────────────────┘ │ ┌───────────────────────────────▼─────────────────────────────┐ │                  Configuration Management          
-│ └───────────────────────────────┬─────────────────────────────┘ │ ┌───────────────────────────────▼─────────────────────────────┐ │                   Optimization Pipeline          
-│ └┬──────────┬──────────┬──────────┬──────────┬──────────┬─────┘ │          │          │          │          │          │ ┌▼──────────▼┐ ┌───────▼────────┐ ┌─────────▼────────┐      
-┌▼──────────────┐ │Fine-tuning│ │Quantization    │ │Pruning          │ │Distillation    │ └───────────┘ └────────────────┘ └────────────────┘ └───────────────┘                        
-
-┌───────────┐ ┌────────────────┐ ┌────────────────┐ │Evaluation │ │ONNX Conversion │ │Benchmarking    │ └───────────┘ └────────────────┘ └────────────────┘                            
-
-                                                                                                                                                                                       
-                                                                                                                                                                                       
+ ### Component Diagram   (TODO)                                                                                                                                                                           
  ## Key Components                                                                                                                                                                     
                                                                                                                                                                                        
  ### 1. Base Classes (`base.py`)                                                                                                                                                       
