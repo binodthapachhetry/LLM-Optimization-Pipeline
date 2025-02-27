@@ -1,0 +1,23 @@
+# Configuration for ONNX conversion pipeline                                                                                                                                          
+                                                                                                                                                                                       
+model:                                                                                                                                                                                
+  name: "gpt2"                                                                                                                                                                        
+  pretrained: true                                                                                                                                                                    
+                                                                                                                                                                                      
+pipeline:                                                                                                                                                                             
+  stages:                                                                                                                                                                             
+    - onnx_conversion                                                                                                                                                                 
+    - benchmarking                                                                                                                                                                    
+                                                                                                                                                                                      
+onnx_conversion:                                                                                                                                                                      
+  opset_version: 13                                                                                                                                                                   
+  output_dir: "./outputs/onnx"                                                                                                                                                        
+                                                                                                                                                                                      
+benchmarking:                                                                                                                                                                         
+  baseline_model: "gpt2"                                                                                                                                                              
+  sequence_lengths: [128, 512]                                                                                                                                                        
+  batch_sizes: [1, 4]                                                                                                                                                                 
+  num_iterations: 10                                                                                                                                                                  
+                                                                                                                                                                                      
+output_dir: "./outputs/onnx"                                                                                                                                                          
+debug: false  

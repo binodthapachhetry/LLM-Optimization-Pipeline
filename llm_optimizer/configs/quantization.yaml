@@ -1,0 +1,35 @@
+# Configuration for quantization pipeline                                                                                                                                             
+                                                                                                                                                                                       
+model:                                                                                                                                                                                
+  name: "gpt2"                                                                                                                                                                        
+  pretrained: true                                                                                                                                                                    
+                                                                                                                                                                                      
+pipeline:                                                                                                                                                                             
+  stages:                                                                                                                                                                             
+    - quantization                                                                                                                                                                    
+    - evaluation                                                                                                                                                                      
+    - benchmarking                                                                                                                                                                    
+                                                                                                                                                                                      
+quantization:                                                                                                                                                                         
+  method: "int8"  # Options: int8, int4, dynamic, static                                                                                                                              
+  output_dir: "./outputs/quantized"                                                                                                                                                   
+                                                                                                                                                                                      
+evaluation:                                                                                                                                                                           
+  evaluate_perplexity: true                                                                                                                                                           
+  evaluate_tasks: true                                                                                                                                                                
+  evaluate_efficiency: true                                                                                                                                                           
+  evaluate_memory: true                                                                                                                                                               
+  tasks: ["lambada"]                                                                                                                                                                  
+  max_samples: 100                                                                                                                                                                    
+  sequence_lengths: [128, 512]                                                                                                                                                        
+  batch_sizes: [1, 4]                                                                                                                                                                 
+                                                                                                                                                                                      
+benchmarking:                                                                                                                                                                         
+  baseline_model: "gpt2"                                                                                                                                                              
+  sequence_lengths: [128, 512]                                                                                                                                                        
+  batch_sizes: [1, 4]                                                                                                                                                                 
+  num_iterations: 10                                                                                                                                                                  
+  benchmark_quality: true                                                                                                                                                             
+                                                                                                                                                                                      
+output_dir: "./outputs/quantized"                                                                                                                                                     
+debug: false 

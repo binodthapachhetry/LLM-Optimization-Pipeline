@@ -1,0 +1,35 @@
+[build-system]                                                                                                                                                                        
+requires = ["setuptools>=42", "wheel"]                                                                                                                                                
+build-backend = "setuptools.build_meta"                                                                                                                                               
+                                                                                                                                                                                    
+[project]                                                                                                                                                                             
+name = "llm_optimizer"                                                                                                                                                                
+version = "0.1.0"                                                                                                                                                                     
+description = "Modular pipeline for LLM post-training optimization"                                                                                                                   
+readme = "README.md"                                                                                                                                                                  
+authors = [                                                                                                                                                                           
+    {name = "LLM Optimizer Team"}                                                                                                                                                     
+]                                                                                                                                                                                     
+license = {text = "MIT"}                                                                                                                                                              
+classifiers = [                                                                                                                                                                       
+    "Programming Language :: Python :: 3",                                                                                                                                            
+    "License :: OSI Approved :: MIT License",                                                                                                                                         
+    "Operating System :: OS Independent",                                                                                                                                             
+]                                                                                                                                                                                     
+requires-python = ">=3.8"                                                                                                                                                             
+                                                                                                                                                                                    
+[project.urls]                                                                                                                                                                        
+"Homepage" = "https://github.com/binodthapachhetry/LLM-Optimization-Pipeline"                                                                                                                          
+"Bug Tracker" = "https://github.com/binodthapachhetry/LLM-Optimization-Pipeline/issues"                                                                                                                
+                                                                                                                                                                                    
+[project.scripts]                                                                                                                                                                     
+llm-optimizer = "llm_optimizer.cli:main"                                                                                                                                              
+                                                                                                                                                                                    
+[tool.black]                                                                                                                                                                          
+line-length = 88                                                                                                                                                                      
+                                                                                                                                                                                    
+[tool.isort]                                                                                                                                                                          
+profile = "black"                                                                                                                                                                     
+                                                                                                                                                                                    
+[tool.pytest.ini_options]                                                                                                                                                             
+testpaths = ["tests"]

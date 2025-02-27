@@ -1,0 +1,36 @@
+# Configuration for pruning pipeline                                                                                                                                                  
+                                                                                                                                                                                       
+model:                                                                                                                                                                                
+  name: "gpt2"                                                                                                                                                                        
+  pretrained: true                                                                                                                                                                    
+                                                                                                                                                                                      
+pipeline:                                                                                                                                                                             
+  stages:                                                                                                                                                                             
+    - pruning                                                                                                                                                                         
+    - evaluation                                                                                                                                                                      
+    - benchmarking                                                                                                                                                                    
+                                                                                                                                                                                      
+pruning:                                                                                                                                                                              
+  method: "magnitude"  # Options: magnitude, movement, structured, iterative                                                                                                          
+  amount: 0.3  # Pruning ratio (0.3 = 30%)                                                                                                                                            
+  # For iterative pruning                                                                                                                                                             
+  n_iterations: 5                                                                                                                                                                     
+  output_dir: "./outputs/pruned"                                                                                                                                                      
+                                                                                                                                                                                      
+evaluation:                                                                                                                                                                           
+  evaluate_perplexity: true                                                                                                                                                           
+  evaluate_tasks: true                                                                                                                                                                
+  evaluate_efficiency: true                                                                                                                                                           
+  evaluate_memory: true                                                                                                                                                               
+  tasks: ["lambada"]                                                                                                                                                                  
+  max_samples: 100                                                                                                                                                                    
+                                                                                                                                                                                      
+benchmarking:                                                                                                                                                                         
+  baseline_model: "gpt2"                                                                                                                                                              
+  sequence_lengths: [128, 512]                                                                                                                                                        
+  batch_sizes: [1, 4]                                                                                                                                                                 
+  num_iterations: 10                                                                                                                                                                  
+  benchmark_quality: true                                                                                                                                                             
+                                                                                                                                                                                      
+output_dir: "./outputs/pruned"                                                                                                                                                        
+debug: false     

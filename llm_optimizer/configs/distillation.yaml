@@ -1,0 +1,44 @@
+# Configuration for distillation pipeline                                                                                                                                             
+                                                                                                                                                                                       
+model:                                                                                                                                                                                
+  name: "gpt2-large"  # Teacher model                                                                                                                                                 
+  pretrained: true                                                                                                                                                                    
+                                                                                                                                                                                      
+pipeline:                                                                                                                                                                             
+  stages:                                                                                                                                                                             
+    - distillation                                                                                                                                                                    
+    - evaluation                                                                                                                                                                      
+    - benchmarking                                                                                                                                                                    
+                                                                                                                                                                                      
+distillation:                                                                                                                                                                         
+  student_model: "distilgpt2"                                                                                                                                                         
+  temperature: 2.0                                                                                                                                                                    
+  alpha: 0.5  # Weight for distillation loss                                                                                                                                          
+  dataset: "wikitext"                                                                                                                                                                 
+  dataset_config: "wikitext-2-raw-v1"                                                                                                                                                 
+  num_epochs: 3                                                                                                                                                                       
+  batch_size: 4                                                                                                                                                                       
+  gradient_accumulation_steps: 4                                                                                                                                                      
+  learning_rate: 5e-5                                                                                                                                                                 
+  weight_decay: 0.01                                                                                                                                                                  
+  warmup_steps: 500                                                                                                                                                                   
+  max_length: 512                                                                                                                                                                     
+  output_dir: "./outputs/distilled"                                                                                                                                                   
+                                                                                                                                                                                      
+evaluation:                                                                                                                                                                           
+  evaluate_perplexity: true                                                                                                                                                           
+  evaluate_tasks: true                                                                                                                                                                
+  evaluate_efficiency: true                                                                                                                                                           
+  evaluate_memory: true                                                                                                                                                               
+  tasks: ["lambada", "hellaswag"]                                                                                                                                                     
+  max_samples: 100                                                                                                                                                                    
+                                                                                                                                                                                      
+benchmarking:                                                                                                                                                                         
+  baseline_model: "gpt2-large"                                                                                                                                                        
+  sequence_lengths: [128, 512, 1024]                                                                                                                                                  
+  batch_sizes: [1, 4]                                                                                                                                                                 
+  num_iterations: 10                                                                                                                                                                  
+  benchmark_quality: true                                                                                                                                                             
+                                                                                                                                                                                      
+output_dir: "./outputs/distilled"                                                                                                                                                     
+debug: false  

@@ -1,0 +1,38 @@
+model:                                                                                                                                                                                
+  name: "gpt2"                                                                                                                                                                        
+  pretrained: true                                                                                                                                                                    
+                                                                                                                                                                                      
+pipeline:                                                                                                                                                                             
+  stages:                                                                                                                                                                             
+    - fine_tuning                                                                                                                                                                     
+    - evaluation                                                                                                                                                                      
+                                                                                                                                                                                      
+fine_tuning:                                                                                                                                                                          
+  method: "lora"  # Options: full, lora, qlora, ptuning                                                                                                                               
+  dataset: "wikitext"                                                                                                                                                                 
+  dataset_config: "wikitext-2-raw-v1"                                                                                                                                                 
+  num_epochs: 3                                                                                                                                                                       
+  batch_size: 4                                                                                                                                                                       
+  gradient_accumulation_steps: 4                                                                                                                                                      
+  learning_rate: 5e-5                                                                                                                                                                 
+  weight_decay: 0.01                                                                                                                                                                  
+  warmup_steps: 500                                                                                                                                                                   
+  max_length: 512                                                                                                                                                                     
+  # LoRA specific parameters                                                                                                                                                          
+  lora_r: 16                                                                                                                                                                          
+  lora_alpha: 32                                                                                                                                                                      
+  lora_target_modules: ["q_proj", "v_proj"]                                                                                                                                           
+  lora_dropout: 0.05                                                                                                                                                                  
+                                                                                                                                                                                      
+evaluation:                                                                                                                                                                           
+  evaluate_perplexity: true                                                                                                                                                           
+  evaluate_tasks: true                                                                                                                                                                
+  evaluate_efficiency: true                                                                                                                                                           
+  evaluate_memory: true                                                                                                                                                               
+  tasks: ["lambada"]                                                                                                                                                                  
+  max_samples: 100                                                                                                                                                                    
+  sequence_lengths: [128, 512]                                                                                                                                                        
+  batch_sizes: [1, 4]                                                                                                                                                                 
+                                                                                                                                                                                      
+output_dir: "./outputs"                                                                                                                                                               
+debug: false
