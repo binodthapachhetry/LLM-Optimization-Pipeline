@@ -1,0 +1,22 @@
+# Configuration for benchmarking Llama models
+benchmark:
+  # Model paths
+  baseline_model: "meta-llama/Llama-3.2-1B-Instruct"  # Original model
+  optimized_model: "bartowski/Llama-3.2-1B-Instruct-GGUF/blob/main/Llama-3.2-1B-Instruct-Q4_0_8_8.gguf"  # Quantized model
+  
+  # Output directory
+  output_dir: "./outputs/llama_benchmark"
+  
+  # Benchmark parameters
+  sequence_lengths: [128, 256, 512]  # Sequence lengths to test
+  batch_sizes: [1, 2, 4]  # Batch sizes to test
+  num_iterations: 5  # Number of iterations for each test
+  
+  # Quality benchmarking
+  benchmark_quality: true  # Whether to benchmark quality
+  
+  # Evaluation tasks
+  evaluation:
+    tasks: ["perplexity"]  # Tasks to evaluate
+    dataset: "wikitext"  # Dataset for evaluation
+    max_samples: 100  # Maximum number of samples to evaluate

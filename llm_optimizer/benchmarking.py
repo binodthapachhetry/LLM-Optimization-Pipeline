@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd                                                                                                                                                                   
 import matplotlib.pyplot as plt                                                                                                                                                       
 import seaborn as sns                                                                                                                                                                 
+from transformers import AutoTokenizer
                                                                                                                                                                                     
 from llm_optimizer.base import OptimizationStage                                                                                                                                      
 from llm_optimizer.utils.model import load_model_and_tokenizer                                                                                                                        
@@ -52,9 +53,9 @@ class BenchmarkingStage(OptimizationStage):
                                                                                                                                                                                     
         logger.info(f"Benchmarking optimized model {optimized_model_path} against baseline {baseline_model_path}")                                                                    
                                                                                                                                                                                     
-        # Load models                                                                                                                                                                 
-        optimized_model, optimized_tokenizer = load_model_and_tokenizer(optimized_model_path)                                                                                         
-        baseline_model, baseline_tokenizer = load_model_and_tokenizer(baseline_model_path)                                                                                            
+        # Load models with format detection
+        optimized_model, optimized_tokenizer = self._load_model_with_format_detection(optimized_model_path)
+        baseline_model, baseline_tokenizer = self._load_model_with_format_detection(baseline_model_path)
                                                                                                                                                                                     
         # Run benchmarks                                                                                                                                                              
         benchmark_results = self._run_benchmarks(                                                                                                                                     
@@ -176,6 +177,40 @@ class BenchmarkingStage(OptimizationStage):
                                                                                                                                                                                     
         return latency_results, throughput_results                                                                                                                                    
                                                                                                                                                                                     
+    def _load_model_with_format_detection(self, model_path):
+        """
+        Load a model with automatic format detection.
+        
+        Supports:
+        - Hugging Face models
+        - GGUF models
+        - ONNX models
+        
+        Args:
+            model_path: Path to the model
+            
+        Returns:
+            Tuple of (model, tokenizer)
+        """
+        # Check if path is a GGUF file
+        if model_path.endswith('.gguf'):
+            from llm_optimizer.utils.model import load_gguf_model
+            return load_gguf_model(model_path)
+            
+        # Check if path is an ONNX model directory
+        elif os.path.exists(os.path.join(model_path, 'model.onnx')) or model_path.endswith('.onnx'):
+            from optimum.onnxruntime import ORTModelForCausalLM
+            try:
+                model = ORTModelForCausalLM.from_pretrained(model_path)
+                tokenizer = AutoTokenizer.from_pretrained(model_path)
+                return model, tokenizer
+            except Exception as e:
+                logger.warning(f"Failed to load ONNX model: {e}")
+                # Fall back to standard loading
+        
+        # Default: Load as Hugging Face model
+        return load_model_and_tokenizer(model_path)
+    
     def _measure_model_performance(self, model, input_ids, num_iterations):                                                                                                           
         """                                                                                                                                                                           
         Measure model latency and throughput.                                                                                                                                         
@@ -314,12 +349,10 @@ class BenchmarkingStage(OptimizationStage):
                                                                                                                                                                                     
         os.makedirs(opt_temp_dir, exist_ok=True)                                                                                                                                      
         os.makedirs(base_temp_dir, exist_ok=True)                                                                                                                                     
-                                                                                                                                                                                    
-        optimized_model.save_pretrained(opt_temp_dir)                                                                                                                                 
-        optimized_tokenizer.save_pretrained(opt_temp_dir)                                                                                                                             
-                                                                                                                                                                                    
-        baseline_model.save_pretrained(base_temp_dir)                                                                                                                                 
-        baseline_tokenizer.save_pretrained(base_temp_dir)                                                                                                                             
+        
+        # Handle different model types for saving
+        self._save_model_with_format_detection(optimized_model, optimized_tokenizer, opt_temp_dir)
+        self._save_model_with_format_detection(baseline_model, baseline_tokenizer, base_temp_dir)
                                                                                                                                                                                     
         # Evaluate models                                                                                                                                                             
         opt_metrics = evaluator.evaluate(opt_temp_dir)                                                                                                                                
@@ -560,6 +593,66 @@ class BenchmarkingStage(OptimizationStage):
         plt.savefig(output_path)                                                                                                                                                      
         plt.close(fig)                                                                                                                                                                
                                                                                                                                                                                     
+    def _save_model_with_format_detection(self, model, tokenizer, output_dir):
+        """
+        Save a model with format detection.
+        
+        Handles different model types:
+        - Hugging Face models
+        - GGUF models
+        - ONNX models
+        
+        Args:
+            model: The model to save
+            tokenizer: The tokenizer to save
+            output_dir: Directory to save to
+        """
+        # Check if model is a GGUF model wrapper
+        if hasattr(model, 'name_or_path') and getattr(model, 'name_or_path', '').endswith('.gguf'):
+            # For GGUF models, we just need to copy the file
+            import shutil
+            gguf_path = model.name_or_path
+            shutil.copy(gguf_path, os.path.join(output_dir, os.path.basename(gguf_path)))
+            
+            # Save tokenizer if possible
+            if hasattr(tokenizer, 'save_pretrained'):
+                try:
+                    tokenizer.save_pretrained(output_dir)
+                except Exception as e:
+                    logger.warning(f"Could not save GGUF tokenizer: {e}")
+            return
+            
+        # Check if model is an ONNX model
+        if hasattr(model, 'model_path') and model.model_path.endswith('.onnx'):
+            # For ONNX models, copy the model file
+            import shutil
+            shutil.copy(model.model_path, os.path.join(output_dir, 'model.onnx'))
+            
+            # Save tokenizer if possible
+            if hasattr(tokenizer, 'save_pretrained'):
+                tokenizer.save_pretrained(output_dir)
+            return
+        
+        # Default: Save as Hugging Face model
+        try:
+            model.save_pretrained(output_dir)
+            tokenizer.save_pretrained(output_dir)
+        except Exception as e:
+            logger.warning(f"Error saving model: {e}")
+            # Fallback: try to copy the model files
+            if hasattr(model, 'name_or_path') and os.path.exists(model.name_or_path):
+                import shutil
+                if os.path.isdir(model.name_or_path):
+                    for item in os.listdir(model.name_or_path):
+                        s = os.path.join(model.name_or_path, item)
+                        d = os.path.join(output_dir, item)
+                        if os.path.isdir(s):
+                            shutil.copytree(s, d, dirs_exist_ok=True)
+                        else:
+                            shutil.copy2(s, d)
+                else:
+                    shutil.copy2(model.name_or_path, output_dir)
+    
     def _plot_quality_comparison(self, quality_data, output_path):                                                                                                                    
         """Plot quality metrics comparison."""                                                                                                                                        
         # Filter metrics that have numeric values                                                                                                                                     
