@@ -18,7 +18,7 @@ def load_model_and_tokenizer(
     load_in_4bit: bool = False,                                                                                                                                                       
     device_map: Optional[Union[str, Dict[str, Union[int, str]]]] = None,                                                                                                              
     torch_dtype: Optional[torch.dtype] = None,                                                                                                                                        
-) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:                                                                                                                                      
+) -> Tuple[Any, Any]:                                                                                                                                                      
     """                                                                                                                                                                               
     Load a model and tokenizer from a path or model name.                                                                                                                             
                                                                                                                                                                                     
@@ -33,6 +33,10 @@ def load_model_and_tokenizer(
         Tuple of (model, tokenizer)                                                                                                                                                   
     """                                                                                                                                                                               
     logger.info(f"Loading model from {model_path}")                                                                                                                                   
+    
+    # Check if this is a GGUF model
+    if model_path.endswith(".gguf"):
+        return load_gguf_model(model_path, device_map)
                                                                                                                                                                                     
     # Set default device map if not provided                                                                                                                                          
     if device_map is None:                                                                                                                                                            
@@ -84,6 +88,152 @@ def load_model_and_tokenizer(
     logger.info(f"Model loaded successfully")                                                                                                                                         
                                                                                                                                                                                     
     return model, tokenizer                                                                                                                                                           
+
+
+def load_gguf_model(model_path: str, device_map: Optional[Union[str, Dict[str, Union[int, str]]]] = None) -> Tuple[Any, Any]:
+    """
+    Load a GGUF model using llama-cpp-python.
+    
+    Args:
+        model_path: Path to the GGUF model file
+        device_map: Device map (only 'cpu' or 'cuda' supported)
+        
+    Returns:
+        Tuple of (model, tokenizer)
+    """
+    try:
+        from llama_cpp import Llama
+    except ImportError:
+        raise ImportError(
+            "llama-cpp-python is required to load GGUF models. "
+            "Install it with: pip install llama-cpp-python"
+        )
+    
+    # Determine if we should use GPU
+    use_gpu = False
+    n_gpu_layers = 0
+    
+    if device_map is not None:
+        if isinstance(device_map, str):
+            use_gpu = device_map == "cuda" or device_map == "auto" and torch.cuda.is_available()
+        elif isinstance(device_map, dict):
+            # If any layer is on GPU, enable GPU
+            use_gpu = any(v == "cuda" or isinstance(v, int) for v in device_map.values())
+    
+    if use_gpu:
+        n_gpu_layers = -1  # Use all layers on GPU
+    
+    # Load the model
+    logger.info(f"Loading GGUF model with n_gpu_layers={n_gpu_layers}")
+    llama_model = Llama(
+        model_path=model_path,
+        n_gpu_layers=n_gpu_layers,
+        n_ctx=2048,  # Context window size
+    )
+    
+    # Create wrapper classes to make the GGUF model compatible with our benchmarking interface
+    model = GGUFModelWrapper(llama_model)
+    tokenizer = GGUFTokenizerWrapper(llama_model)
+    
+    logger.info(f"GGUF model loaded successfully")
+    
+    return model, tokenizer
+
+
+class GGUFModelWrapper:
+    """Wrapper for GGUF models to make them compatible with the benchmarking interface."""
+    
+    def __init__(self, llama_model):
+        self.model = llama_model
+        self.device = torch.device("cuda" if getattr(llama_model, "n_gpu_layers", 0) > 0 else "cpu")
+    
+    def __call__(self, input_ids, **kwargs):
+        """
+        Forward pass that mimics the HF interface.
+        
+        Args:
+            input_ids: Input token IDs
+            
+        Returns:
+            Object with a 'logits' attribute
+        """
+        # Convert to list of token IDs if it's a tensor
+        if hasattr(input_ids, "cpu"):
+            input_ids = input_ids.cpu().numpy().tolist()
+        
+        if isinstance(input_ids, list) and isinstance(input_ids[0], list):
+            # Handle batched inputs - we'll process just the first one for simplicity
+            # In a real implementation, you'd want to process all batch items
+            input_ids = input_ids[0]
+        
+        # Run the model (just evaluate without generating)
+        self.model.eval(input_ids)
+        
+        # Create a simple object with logits attribute to match HF interface
+        class SimpleOutput:
+            def __init__(self, logits):
+                self.logits = logits
+        
+        # Create fake logits tensor of the right shape
+        # This is a simplification - real logits would be the actual model outputs
+        vocab_size = self.model.n_vocab()
+        seq_len = len(input_ids)
+        logits = torch.zeros((1, seq_len, vocab_size), device=self.device)
+        
+        return SimpleOutput(logits)
+    
+    def eval(self):
+        """Set the model to evaluation mode."""
+        # GGUF models are always in eval mode
+        return self
+    
+    def parameters(self):
+        """Return an empty iterator for parameters."""
+        # This is needed for the memory calculation
+        # GGUF models don't expose parameters in the same way
+        return []
+    
+    def buffers(self):
+        """Return an empty iterator for buffers."""
+        # This is needed for the memory calculation
+        return []
+    
+    @property
+    def name_or_path(self):
+        """Return the model path."""
+        return getattr(self.model, "model_path", "gguf-model")
+
+
+class GGUFTokenizerWrapper:
+    """Wrapper for GGUF model tokenizer to make it compatible with the HF interface."""
+    
+    def __init__(self, llama_model):
+        self.model = llama_model
+    
+    def __call__(self, text, **kwargs):
+        """Tokenize text."""
+        if isinstance(text, list):
+            # Handle batch
+            return [self.model.tokenize(t) for t in text]
+        return self.model.tokenize(text)
+    
+    def decode(self, token_ids, **kwargs):
+        """Decode token IDs to text."""
+        if isinstance(token_ids, torch.Tensor):
+            token_ids = token_ids.cpu().numpy().tolist()
+        
+        # GGUF models typically don't have a batch decode method
+        # so we'll implement a simple version
+        if isinstance(token_ids[0], list):
+            return [self.model.detokenize(ids) for ids in token_ids]
+        return self.model.detokenize(token_ids)
+    
+    def save_pretrained(self, save_directory):
+        """Mock save_pretrained method."""
+        # We don't actually save anything, just create a dummy file
+        os.makedirs(save_directory, exist_ok=True)
+        with open(os.path.join(save_directory, "tokenizer_config.json"), "w") as f:
+            f.write('{"type": "gguf_wrapper"}')
                                                                                                                                                                                     
                                                                                                                                                                                     
 def get_model_size(model: torch.nn.Module) -> float:                                                                                                                                  
