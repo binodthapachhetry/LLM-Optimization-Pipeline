@@ -16,7 +16,8 @@ import seaborn as sns
 from transformers import AutoTokenizer
                                                                                                                                                                                     
 from llm_optimizer.base import OptimizationStage                                                                                                                                      
-from llm_optimizer.utils.model import load_model_and_tokenizer                                                                                                                        
+from llm_optimizer.utils.model import load_model_and_tokenizer
+from llm_optimizer.utils.gguf_utils import load_gguf_model
                                                                                                                                                                                     
 logger = logging.getLogger(__name__)                                                                                                                                                  
                                                                                                                                                                                     
@@ -192,15 +193,16 @@ class BenchmarkingStage(OptimizationStage):
         Returns:
             Tuple of (model, tokenizer)
         """
-        # Check if path is a GGUF file
-        if model_path.endswith('.gguf'):
-            from llm_optimizer.utils.model import load_gguf_model
+        # Check if path is a GGUF file or contains GGUF in the path
+        if model_path.endswith('.gguf') or '.gguf' in model_path:
+            logger.info(f"Loading GGUF model: {model_path}")
             return load_gguf_model(model_path)
             
         # Check if path is an ONNX model directory
         elif os.path.exists(os.path.join(model_path, 'model.onnx')) or model_path.endswith('.onnx'):
             from optimum.onnxruntime import ORTModelForCausalLM
             try:
+                logger.info(f"Loading ONNX model: {model_path}")
                 model = ORTModelForCausalLM.from_pretrained(model_path)
                 tokenizer = AutoTokenizer.from_pretrained(model_path)
                 return model, tokenizer
@@ -209,6 +211,7 @@ class BenchmarkingStage(OptimizationStage):
                 # Fall back to standard loading
         
         # Default: Load as Hugging Face model
+        logger.info(f"Loading Hugging Face model: {model_path}")
         return load_model_and_tokenizer(model_path)
     
     def _measure_model_performance(self, model, input_ids, num_iterations):                                                                                                           

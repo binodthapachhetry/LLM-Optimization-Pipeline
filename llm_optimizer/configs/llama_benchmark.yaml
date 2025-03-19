@@ -2,7 +2,7 @@
 benchmark:
   # Model paths
   baseline_model: "meta-llama/Llama-3.2-1B-Instruct"  # Original model
-  optimized_model: "bartowski/Llama-3.2-1B-Instruct-GGUF/blob/main/Llama-3.2-1B-Instruct-Q4_0_8_8.gguf"  # Quantized model
+  optimized_model: "bartowski/Llama-3.2-1B-Instruct-GGUF"  # Quantized model (will auto-detect GGUF file)
   
   # Output directory
   output_dir: "./outputs/llama_benchmark"

@@ -8,7 +8,10 @@ bitsandbytes==0.40.2
 optimum==1.8.7                                                                                                                                                                        
 onnx==1.14.0                                                                                                                                                                          
 onnxruntime==1.15.1  
-dspy-ai==2.6.7                                                                                                                                                                 
+dspy-ai==2.6.7
+llama-cpp-python==0.2.38  # Added for GGUF model support
+huggingface_hub>=0.19.0  # For downloading models from HF
+requests>=2.31.0  # For downloading files
                                                                                                                                                                                     
 # Evaluation and metrics                                                                                                                                                              
 evaluate==0.4.0                                                                                                                                                                       
