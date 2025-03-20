@@ -95,6 +95,98 @@ def optimize(
         return 1                                                                                                                                                                      
                                                                                                                                                                                     
                                                                                                                                                                                     
+@app.command()
+def benchmark(
+    config_path: str = typer.Argument(
+        ..., help="Path to the benchmarking configuration file"
+    ),
+    baseline_model: Optional[str] = typer.Option(
+        None, help="Path or name of the baseline model (overrides config)"
+    ),
+    optimized_model: Optional[str] = typer.Option(
+        None, help="Path or name of the optimized model (overrides config)"
+    ),
+    output_dir: Optional[str] = typer.Option(
+        None, help="Directory to save benchmark results (overrides config)"
+    ),
+    no_quality: bool = typer.Option(
+        False, help="Skip quality benchmarking (faster)"
+    ),
+    debug: bool = typer.Option(False, help="Enable debug mode"),
+):
+    """
+    Benchmark models to compare performance, memory usage, and quality.
+    """
+    try:
+        # Load configuration
+        config = load_config(config_path)
+        
+        # Override config with CLI options
+        if baseline_model:
+            config.benchmark.baseline_model = baseline_model
+            
+        if optimized_model:
+            config.benchmark.optimized_model = optimized_model
+            
+        if output_dir:
+            config.benchmark.output_dir = output_dir
+            
+        if no_quality:
+            config.benchmark.benchmark_quality = False
+            
+        if debug:
+            config.debug = True
+            
+        # Create output directory
+        os.makedirs(config.benchmark.output_dir, exist_ok=True)
+        
+        # Save the resolved configuration
+        config_save_path = Path(config.benchmark.output_dir) / "benchmark_config.yaml"
+        with open(config_save_path, "w") as f:
+            f.write(OmegaConf.to_yaml(config))
+            
+        # Display configuration summary
+        console.print(
+            Panel.fit(
+                f"[bold green]LLM Benchmarking[/bold green]\n\n"
+                f"Baseline model: {config.benchmark.baseline_model}\n"
+                f"Optimized model: {config.benchmark.optimized_model}\n"
+                f"Output directory: {config.benchmark.output_dir}\n"
+                f"Quality benchmarking: {'Enabled' if config.benchmark.get('benchmark_quality', True) else 'Disabled'}"
+            )
+        )
+        
+        # Initialize and run the benchmarking stage
+        from llm_optimizer.benchmarking import BenchmarkingStage
+        
+        # Create a minimal model state for the optimized model
+        model_state = {
+            "model_path": config.benchmark.optimized_model,
+            "is_pretrained": True,
+        }
+        
+        # Run benchmarking
+        benchmark_stage = BenchmarkingStage(config.benchmark)
+        results = benchmark_stage.run(model_state)
+        
+        # Display results summary
+        console.print(
+            Panel.fit(
+                f"[bold green]Benchmarking Complete[/bold green]\n\n"
+                f"Results saved to: {config.benchmark.output_dir}\n"
+                f"See benchmark_summary.txt for detailed results"
+            )
+        )
+        
+        return 0
+        
+    except Exception as e:
+        console.print(f"[bold red]Error:[/bold red] {str(e)}")
+        if debug:
+            console.print_exception()
+        return 1
+
+
 @app.command()                                                                                                                                                                        
 def evaluate(                                                                                                                                                                         
     model_path: str = typer.Argument(..., help="Path to the optimized model"),                                                                                                        
