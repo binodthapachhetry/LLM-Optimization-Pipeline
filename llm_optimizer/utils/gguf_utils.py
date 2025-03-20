@@ -12,6 +12,12 @@ from huggingface_hub import hf_hub_download, HfApi
 from llama_cpp import Llama
 from llm_optimizer.utils.model import GGUFModelWrapper, GGUFTokenizerWrapper
 
+from rich.console import Console  
+
+
+
+console = Console() 
+
 logger = logging.getLogger(__name__)
 
 def download_gguf_model(model_path: str, cache_dir: Optional[str] = None) -> str:
@@ -41,6 +47,7 @@ def download_gguf_model(model_path: str, cache_dir: Optional[str] = None) -> str
         cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "llm_optimizer", "gguf_models")
     
     os.makedirs(cache_dir, exist_ok=True)
+    console.print(cache_dir)
     
     # Case 1: Hugging Face model repository
     if "huggingface.co" in model_path or not any(prefix in model_path for prefix in ["http://", "https://", "ftp://"]):
@@ -174,7 +181,7 @@ def _download_from_url(url: str, cache_dir: str) -> str:
         logger.error(f"Error downloading from URL: {e}")
         raise
 
-def load_gguf_model(model_path: str, n_ctx: int = 2048, n_gpu_layers: int = -1) -> Tuple[GGUFModelWrapper, GGUFTokenizerWrapper]:
+def load_gguf_model(model_path: str, n_ctx: int = 512, n_gpu_layers: int = -1) -> Tuple[GGUFModelWrapper, GGUFTokenizerWrapper]:
     """
     Load a GGUF model with automatic downloading.
     
@@ -187,7 +194,10 @@ def load_gguf_model(model_path: str, n_ctx: int = 2048, n_gpu_layers: int = -1) 
         Tuple of (model_wrapper, tokenizer_wrapper)
     """
     # Download the model if needed
+    console.print(model_path)
     local_path = download_gguf_model(model_path)
+
+    console.print(local_path)
     
     # Load the model with llama-cpp-python
     llama_model = Llama(
@@ -195,6 +205,8 @@ def load_gguf_model(model_path: str, n_ctx: int = 2048, n_gpu_layers: int = -1) 
         n_ctx=n_ctx,
         n_gpu_layers=n_gpu_layers
     )
+
+    console.print("out of llama")
     
     # Create wrappers for compatibility with the benchmarking interface
     model_wrapper = GGUFModelWrapper(llama_model)

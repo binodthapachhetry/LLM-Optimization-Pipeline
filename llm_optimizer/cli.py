@@ -97,9 +97,9 @@ def optimize(
                                                                                                                                                                                     
 @app.command()
 def benchmark(
-    config_path: str = typer.Argument(
-        ..., help="Path to the benchmarking configuration file"
-    ),
+    config_path: str = typer.Option(                                                                                                                                                  
+         ..., "--config", "-c", help="Path to the benchmarking configuration file"                                                                                                     
+     ),
     baseline_model: Optional[str] = typer.Option(
         None, help="Path or name of the baseline model (overrides config)"
     ),
@@ -167,6 +167,7 @@ def benchmark(
         
         # Run benchmarking
         benchmark_stage = BenchmarkingStage(config.benchmark)
+
         results = benchmark_stage.run(model_state)
         
         # Display results summary

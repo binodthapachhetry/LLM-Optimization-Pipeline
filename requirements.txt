@@ -4,12 +4,12 @@ transformers==4.49.0
 datasets==3.4.1                                                                                                                                                                     
 accelerate==1.5.2                                                                                                                                                                 
 peft==0.14.0                                                                                                                                                                           
-bitsandbytes==0.42.0                                                                                                                                                               
+bitsandbytes==0.42.0                                                                                                                                                             
 optimum==1.24.0                                                                                                                                                                        
 onnx==1.17.0                                                                                                                                                                          
 onnxruntime==1.21.0 
 dspy-ai==2.6.12
-llama-cpp-python==0.2.38  # Added for GGUF model support
+llama-cpp-python==0.3.7  # Added for GGUF model support
 huggingface-hub==0.29.3  # For downloading models from HF
 requests==2.32.3  # For downloading files
                                                                                                                                                                                     

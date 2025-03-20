@@ -18,6 +18,13 @@ from transformers import AutoTokenizer
 from llm_optimizer.base import OptimizationStage                                                                                                                                      
 from llm_optimizer.utils.model import load_model_and_tokenizer
 from llm_optimizer.utils.gguf_utils import load_gguf_model
+
+from rich.console import Console  
+
+
+
+console = Console() 
+
                                                                                                                                                                                     
 logger = logging.getLogger(__name__)                                                                                                                                                  
                                                                                                                                                                                     
@@ -41,8 +48,8 @@ class BenchmarkingStage(OptimizationStage):
                                                                                                                                                                                     
         Returns:                                                                                                                                                                      
             Benchmarking results                                                                                                                                                      
-        """                                                                                                                                                                           
-        self.validate_input(model_state)                                                                                                                                              
+        """    
+        self.validate_input(model_state)    
                                                                                                                                                                                     
         # Extract configuration                                                                                                                                                       
         optimized_model_path = model_state["model_path"]                                                                                                                              
@@ -55,6 +62,7 @@ class BenchmarkingStage(OptimizationStage):
         logger.info(f"Benchmarking optimized model {optimized_model_path} against baseline {baseline_model_path}")                                                                    
                                                                                                                                                                                     
         # Load models with format detection
+        # baseline_model, baseline_tokenizer = self._load_model_with_format_detection(baseline_model_path)
         optimized_model, optimized_tokenizer = self._load_model_with_format_detection(optimized_model_path)
         baseline_model, baseline_tokenizer = self._load_model_with_format_detection(baseline_model_path)
                                                                                                                                                                                     

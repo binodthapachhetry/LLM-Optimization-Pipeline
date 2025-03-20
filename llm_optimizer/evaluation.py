@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Union
 import torch                                                                                                                                                                          
 import numpy as np                                                                                                                                                                    
 from transformers import AutoModelForCausalLM, AutoTokenizer                                                                                                                          
-from datasets import load_dataset, load_metric                                                                                                                                        
+from datasets import load_dataset                                                                                                                                       
                                                                                                                                                                                     
 from llm_optimizer.base import OptimizationStage, Evaluator                                                                                                                           
 from llm_optimizer.utils.model import load_model_and_tokenizer                                                                                                                        
