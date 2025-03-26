@@ -416,12 +416,7 @@ class ModelEvaluator(Evaluator):
         return {                                                                                                                                                                      
             "model_size_mb": size_mb,                                                                                                                                                 
             "gpu_memory_mb": gpu_memory_mb,                                                                                                                                           
-        }            """
-Evaluation module for LLM optimization.
-"""
-
-import os
-import json
+        }
 import logging
 import time
 from typing import Dict, Any, List, Optional, Union
