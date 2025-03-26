@@ -1,0 +1,22 @@
+[
+  {
+    "prompt": "The capital of France is",
+    "completion": "Paris"
+  },
+  {
+    "prompt": "Water boils at 100 degrees",
+    "completion": "Celsius"
+  },
+  {
+    "prompt": "The opposite of hot is",
+    "completion": "cold"
+  },
+  {
+    "prompt": "To calculate the area of a rectangle, multiply the length by the",
+    "completion": "width"
+  },
+  {
+    "prompt": "The primary colors are red, blue, and",
+    "completion": "yellow"
+  }
+]

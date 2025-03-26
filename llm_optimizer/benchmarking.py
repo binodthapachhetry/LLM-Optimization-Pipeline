@@ -543,8 +543,38 @@ class BenchmarkingStage(OptimizationStage):
             Dictionary of quality benchmark results                                                                                                                                   
         """                                                                                                                                                                           
         try:
-            from llm_optimizer.evaluation import ModelEvaluator                                                                                                                           
-                                                                                                                                                                                    
+            from llm_optimizer.evaluation import ModelEvaluator
+            
+            # Check if we should use bundled datasets
+            use_bundled = self.config.get("evaluation", {}).get("use_bundled_datasets", False)
+            if use_bundled:
+                # Import the bundled dataset utilities
+                try:
+                    from llm_optimizer.utils.data import get_bundled_dataset_path
+                    logger.info("Using bundled datasets for evaluation")
+                    
+                    # Update config to use bundled datasets
+                    if "evaluation" not in self.config:
+                        self.config["evaluation"] = {}
+                    
+                    # Set dataset paths in config
+                    dataset = self.config["evaluation"].get("dataset", "tiny_wikitext")
+                    completion_dataset = self.config["evaluation"].get("completion_dataset", "tiny_lambada")
+                    
+                    # Get paths to bundled datasets
+                    self.config["evaluation"]["dataset_path"] = get_bundled_dataset_path(dataset)
+                    self.config["evaluation"]["completion_dataset_path"] = get_bundled_dataset_path(completion_dataset)
+                    
+                    logger.info(f"Using bundled dataset: {dataset} at {self.config['evaluation']['dataset_path']}")
+                    logger.info(f"Using bundled completion dataset: {completion_dataset} at {self.config['evaluation']['completion_dataset_path']}")
+                    
+                except ImportError as e:
+                    logger.warning(f"Failed to import bundled dataset utilities: {e}")
+                    logger.warning("Falling back to online datasets")
+                except Exception as e:
+                    logger.warning(f"Error setting up bundled datasets: {e}")
+                    logger.warning("Falling back to online datasets")
+            
             # Create evaluator                                                                                                                                                            
             evaluator = ModelEvaluator(self.config)                                                                                                                                       
                                                                                                                                                                                     
@@ -699,12 +729,20 @@ class BenchmarkingStage(OptimizationStage):
                 f.write("| Metric | Baseline | Optimized | Relative Difference |\n")                                                                                                  
                 f.write("|--------|----------|-----------|---------------------|\n")                                                                                                  
                                                                                                                                                                                     
-                for metric, values in results["quality"].items():                                                                                                                     
+                for metric, values in results["quality"].items():
+                    if metric in ["optimized_model_error", "baseline_model_error", "benchmark_error"]:
+                        continue
+                                                                                                                                                                                    
                     rel_diff = values.get("relative_diff", "N/A")                                                                                                                     
                     if isinstance(rel_diff, float):                                                                                                                                   
                         rel_diff = f"{rel_diff*100:+.2f}%"                                                                                                                            
                                                                                                                                                                                     
-                    f.write(f"| {metric} | {values['baseline']} | {values['optimized']} | {rel_diff} |\n")                                                                            
+                    f.write(f"| {metric} | {values['baseline']} | {values['optimized']} | {rel_diff} |\n")
+                
+                # Add error information if present
+                for error_key in ["benchmark_error", "optimized_model_error", "baseline_model_error"]:
+                    if error_key in results["quality"]:
+                        f.write(f"\n**Error in {error_key}**: {results['quality'][error_key]}\n")
                                                                                                                                                                                     
     def _generate_visualizations(self, results, output_dir):                                                                                                                          
         """Generate visualizations of benchmark results."""                                                                                                                           

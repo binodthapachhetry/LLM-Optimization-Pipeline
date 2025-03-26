@@ -24,8 +24,10 @@ benchmark:
     
   # Evaluation tasks
   evaluation:
-    tasks: ["perplexity"]  # Tasks to evaluate
-    dataset: "wikitext"  # Dataset for evaluation
+    tasks: ["perplexity", "completion_accuracy"]  # Tasks to evaluate
+    dataset: "tiny_wikitext"  # Use bundled dataset (tiny_wikitext or tiny_lambada)
+    completion_dataset: "tiny_lambada"  # Dataset for completion accuracy
+    use_bundled_datasets: true  # Use bundled datasets instead of downloading
     max_samples: 10  # Maximum number of samples to evaluate
     max_sequence_length: 512
     
