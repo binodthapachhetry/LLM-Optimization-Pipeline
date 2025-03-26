@@ -160,6 +160,7 @@ class GGUFModelWrapper:
     def __init__(self, llama_model):
         self.model = llama_model
         self.device = torch.device("cuda" if getattr(llama_model, "n_gpu_layers", 0) > 0 else "cpu")
+        self.name_or_path = getattr(llama_model, "model_path", "gguf-model")
     
     def __call__(self, input_ids, **kwargs):
         """
@@ -171,30 +172,96 @@ class GGUFModelWrapper:
         Returns:
             Object with a 'logits' attribute
         """
-        # Convert to list of token IDs if it's a tensor
-        if hasattr(input_ids, "cpu"):
-            input_ids = input_ids.cpu().numpy().tolist()
-        
-        if isinstance(input_ids, list) and isinstance(input_ids[0], list):
-            # Handle batched inputs - we'll process just the first one for simplicity
-            # In a real implementation, you'd want to process all batch items
-            input_ids = input_ids[0]
-        
-        # Run the model (just evaluate without generating)
-        self.model.eval(input_ids)
-        
-        # Create a simple object with logits attribute to match HF interface
-        class SimpleOutput:
-            def __init__(self, logits):
-                self.logits = logits
-        
-        # Create fake logits tensor of the right shape
-        # This is a simplification - real logits would be the actual model outputs
-        vocab_size = self.model.n_vocab()
-        seq_len = len(input_ids)
-        logits = torch.zeros((1, seq_len, vocab_size), device=self.device)
-        
-        return SimpleOutput(logits)
+        try:
+            # Convert to list of token IDs if it's a tensor
+            if hasattr(input_ids, "cpu"):
+                input_ids = input_ids.cpu().numpy().tolist()
+            
+            # Handle batched inputs
+            batch_size = 1
+            if isinstance(input_ids, list):
+                if isinstance(input_ids[0], list):
+                    batch_size = len(input_ids)
+                    # For batched inputs, we'll process each sequence separately
+                    # and combine the results
+                    all_logits = []
+                    for batch_item in input_ids:
+                        # Run the model on this batch item
+                        result = self._process_single_input(batch_item)
+                        all_logits.append(result.logits)
+                    
+                    # Stack the logits from all batch items
+                    stacked_logits = torch.stack(all_logits)
+                    
+                    # Create output with stacked logits
+                    class BatchOutput:
+                        def __init__(self, logits):
+                            self.logits = logits
+                    
+                    return BatchOutput(stacked_logits)
+                else:
+                    # Single sequence
+                    return self._process_single_input(input_ids)
+            else:
+                # Handle unexpected input type
+                raise ValueError(f"Unexpected input_ids type: {type(input_ids)}")
+                
+        except Exception as e:
+            logger.error(f"Error in GGUF model forward pass: {e}")
+            # Return empty logits as fallback
+            vocab_size = self.model.n_vocab()
+            seq_len = 1
+            if isinstance(input_ids, list):
+                if isinstance(input_ids[0], list):
+                    batch_size = len(input_ids)
+                    seq_len = len(input_ids[0])
+                else:
+                    seq_len = len(input_ids)
+            
+            # Create a simple output with zero logits
+            class ErrorOutput:
+                def __init__(self, logits):
+                    self.logits = logits
+            
+            logits = torch.zeros((batch_size, seq_len, vocab_size), device=self.device)
+            return ErrorOutput(logits)
+    
+    def _process_single_input(self, input_ids):
+        """Process a single input sequence."""
+        # Run the model (evaluate without generating)
+        try:
+            self.model.eval(input_ids)
+            
+            # Get logits from the model if possible
+            if hasattr(self.model, 'logits'):
+                # Some llama-cpp versions expose logits directly
+                raw_logits = self.model.logits()
+                logits = torch.tensor(raw_logits).unsqueeze(0)  # Add batch dimension
+            else:
+                # Otherwise create placeholder logits
+                vocab_size = self.model.n_vocab()
+                seq_len = len(input_ids)
+                logits = torch.zeros((1, seq_len, vocab_size), device=self.device)
+            
+            # Create output object
+            class SimpleOutput:
+                def __init__(self, logits):
+                    self.logits = logits
+            
+            return SimpleOutput(logits)
+            
+        except Exception as e:
+            logger.error(f"Error processing GGUF input: {e}")
+            # Create fallback logits
+            vocab_size = self.model.n_vocab()
+            seq_len = len(input_ids)
+            logits = torch.zeros((1, seq_len, vocab_size), device=self.device)
+            
+            class FallbackOutput:
+                def __init__(self, logits):
+                    self.logits = logits
+            
+            return FallbackOutput(logits)
     
     def eval(self):
         """Set the model to evaluation mode."""

@@ -181,7 +181,7 @@ def _download_from_url(url: str, cache_dir: str) -> str:
         logger.error(f"Error downloading from URL: {e}")
         raise
 
-def load_gguf_model(model_path: str, n_ctx: int = 512, n_gpu_layers: int = -1) -> Tuple[GGUFModelWrapper, GGUFTokenizerWrapper]:
+def load_gguf_model(model_path: str, n_ctx: int = 2048, n_gpu_layers: int = -1) -> Tuple[GGUFModelWrapper, GGUFTokenizerWrapper]:
     """
     Load a GGUF model with automatic downloading.
     
@@ -193,23 +193,40 @@ def load_gguf_model(model_path: str, n_ctx: int = 512, n_gpu_layers: int = -1) -
     Returns:
         Tuple of (model_wrapper, tokenizer_wrapper)
     """
-    # Download the model if needed
-    console.print(model_path)
-    local_path = download_gguf_model(model_path)
-
-    console.print(local_path)
-    
-    # Load the model with llama-cpp-python
-    llama_model = Llama(
-        model_path=local_path,
-        n_ctx=n_ctx,
-        n_gpu_layers=n_gpu_layers
-    )
-
-    console.print("out of llama")
-    
-    # Create wrappers for compatibility with the benchmarking interface
-    model_wrapper = GGUFModelWrapper(llama_model)
-    tokenizer_wrapper = GGUFTokenizerWrapper(llama_model)
-    
-    return model_wrapper, tokenizer_wrapper
+    try:
+        # Download the model if needed
+        logger.info(f"Loading GGUF model from: {model_path}")
+        local_path = download_gguf_model(model_path)
+        logger.info(f"GGUF model downloaded to: {local_path}")
+        
+        # Check if CUDA is available for GPU acceleration
+        use_gpu = torch.cuda.is_available()
+        if use_gpu:
+            logger.info("CUDA is available, enabling GPU acceleration for GGUF model")
+        else:
+            logger.info("CUDA not available, using CPU only for GGUF model")
+            n_gpu_layers = 0
+        
+        # Load the model with llama-cpp-python
+        logger.info(f"Initializing Llama model with n_ctx={n_ctx}, n_gpu_layers={n_gpu_layers}")
+        llama_model = Llama(
+            model_path=local_path,
+            n_ctx=n_ctx,
+            n_gpu_layers=n_gpu_layers,
+            verbose=False  # Reduce verbosity
+        )
+        
+        logger.info("GGUF model loaded successfully")
+        
+        # Create wrappers for compatibility with the benchmarking interface
+        model_wrapper = GGUFModelWrapper(llama_model)
+        tokenizer_wrapper = GGUFTokenizerWrapper(llama_model)
+        
+        # Store the original model path for reference
+        model_wrapper.name_or_path = model_path
+        
+        return model_wrapper, tokenizer_wrapper
+        
+    except Exception as e:
+        logger.error(f"Failed to load GGUF model: {e}")
+        raise RuntimeError(f"Failed to load GGUF model: {e}")

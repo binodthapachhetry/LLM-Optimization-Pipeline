@@ -12,12 +12,25 @@ benchmark:
   batch_sizes: [1, 2, 4]  # Batch sizes to test
   num_iterations: 5  # Number of iterations for each test
   
-  # Quality benchmarking
+  # Benchmark types
   benchmark_quality: true  # Whether to benchmark quality
+  benchmark_memory: true   # Whether to benchmark memory usage
   
+  # Performance benchmarking options
+  performance:
+    warm_up_iterations: 3  # Number of warm-up iterations before timing
+    timeout_seconds: 300   # Maximum time to allow for a single benchmark configuration
+    skip_large_configs: true  # Skip configurations that might cause OOM
+    
   # Evaluation tasks
   evaluation:
     tasks: ["perplexity"]  # Tasks to evaluate
     dataset: "wikitext"  # Dataset for evaluation
     max_samples: 10  # Maximum number of samples to evaluate
     max_sequence_length: 512
+    
+  # Reporting options
+  reporting:
+    include_raw_data: true  # Include raw benchmark data in reports
+    generate_plots: true    # Generate visualization plots
+    save_model_metadata: true  # Save detailed model information

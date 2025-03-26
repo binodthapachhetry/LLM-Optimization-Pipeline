@@ -112,6 +112,18 @@ def benchmark(
     no_quality: bool = typer.Option(
         False, help="Skip quality benchmarking (faster)"
     ),
+    performance_only: bool = typer.Option(
+        False, help="Run only performance benchmarks (no quality or memory tests)"
+    ),
+    sequence_lengths: Optional[str] = typer.Option(
+        None, help="Comma-separated sequence lengths to test (e.g., '128,256,512')"
+    ),
+    batch_sizes: Optional[str] = typer.Option(
+        None, help="Comma-separated batch sizes to test (e.g., '1,2,4')"
+    ),
+    iterations: Optional[int] = typer.Option(
+        None, help="Number of iterations for each benchmark test"
+    ),
     debug: bool = typer.Option(False, help="Enable debug mode"),
 ):
     """
@@ -133,6 +145,27 @@ def benchmark(
             
         if no_quality:
             config.benchmark.benchmark_quality = False
+            
+        if performance_only:
+            config.benchmark.benchmark_quality = False
+            config.benchmark.benchmark_memory = False
+            
+        if sequence_lengths:
+            try:
+                config.benchmark.sequence_lengths = [int(x.strip()) for x in sequence_lengths.split(',')]
+            except ValueError:
+                console.print("[bold red]Error:[/bold red] Invalid sequence lengths format. Use comma-separated integers.")
+                return 1
+                
+        if batch_sizes:
+            try:
+                config.benchmark.batch_sizes = [int(x.strip()) for x in batch_sizes.split(',')]
+            except ValueError:
+                console.print("[bold red]Error:[/bold red] Invalid batch sizes format. Use comma-separated integers.")
+                return 1
+                
+        if iterations:
+            config.benchmark.num_iterations = iterations
             
         if debug:
             config.debug = True

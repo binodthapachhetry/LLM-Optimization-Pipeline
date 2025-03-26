@@ -49,40 +49,101 @@ class BenchmarkingStage(OptimizationStage):
         Returns:                                                                                                                                                                      
             Benchmarking results                                                                                                                                                      
         """    
-        self.validate_input(model_state)    
+        try:
+            self.validate_input(model_state)    
                                                                                                                                                                                     
-        # Extract configuration                                                                                                                                                       
-        optimized_model_path = model_state["model_path"]                                                                                                                              
-        baseline_model_path = self.config.get("baseline_model", "gpt2")                                                                                                               
-        output_dir = os.path.join(                                                                                                                                                    
-            self.config.get("output_dir", "./outputs"),                                                                                                                               
-            "benchmarks"                                                                                                                                                              
-        )                                                                                                                                                                             
+            # Extract configuration                                                                                                                                                       
+            optimized_model_path = model_state["model_path"]                                                                                                                              
+            baseline_model_path = self.config.get("baseline_model", "gpt2")                                                                                                               
+            output_dir = os.path.join(                                                                                                                                                    
+                self.config.get("output_dir", "./outputs"),                                                                                                                               
+                "benchmarks"                                                                                                                                                              
+            )                                                                                                                                                                             
                                                                                                                                                                                     
-        logger.info(f"Benchmarking optimized model {optimized_model_path} against baseline {baseline_model_path}")                                                                    
+            logger.info(f"Benchmarking optimized model {optimized_model_path} against baseline {baseline_model_path}")
+            console.print(f"[bold blue]Loading models...[/bold blue]")
                                                                                                                                                                                     
-        # Load models with format detection
-        # baseline_model, baseline_tokenizer = self._load_model_with_format_detection(baseline_model_path)
-        optimized_model, optimized_tokenizer = self._load_model_with_format_detection(optimized_model_path)
-        baseline_model, baseline_tokenizer = self._load_model_with_format_detection(baseline_model_path)
+            # Load models with format detection - with error handling
+            optimized_model = optimized_tokenizer = None
+            baseline_model = baseline_tokenizer = None
+            
+            try:
+                console.print(f"Loading optimized model: {optimized_model_path}")
+                optimized_model, optimized_tokenizer = self._load_model_with_format_detection(optimized_model_path)
+                console.print(f"[green]✓[/green] Optimized model loaded successfully")
+            except Exception as e:
+                logger.error(f"Failed to load optimized model: {e}")
+                console.print(f"[bold red]Error loading optimized model:[/bold red] {str(e)}")
+                raise ValueError(f"Failed to load optimized model: {e}")
+                
+            try:
+                console.print(f"Loading baseline model: {baseline_model_path}")
+                baseline_model, baseline_tokenizer = self._load_model_with_format_detection(baseline_model_path)
+                console.print(f"[green]✓[/green] Baseline model loaded successfully")
+            except Exception as e:
+                logger.error(f"Failed to load baseline model: {e}")
+                console.print(f"[bold red]Error loading baseline model:[/bold red] {str(e)}")
+                raise ValueError(f"Failed to load baseline model: {e}")
+            
+            # Add model metadata to results
+            metadata = {
+                "optimized_model": {
+                    "path": optimized_model_path,
+                    "type": type(optimized_model).__name__,
+                    "device": getattr(optimized_model, "device", "unknown"),
+                },
+                "baseline_model": {
+                    "path": baseline_model_path,
+                    "type": type(baseline_model).__name__,
+                    "device": getattr(baseline_model, "device", "unknown"),
+                },
+                "benchmark_config": {
+                    "sequence_lengths": self.config.get("sequence_lengths", [128, 512, 1024]),
+                    "batch_sizes": self.config.get("batch_sizes", [1, 4, 8]),
+                    "num_iterations": self.config.get("num_iterations", 10),
+                    "benchmark_quality": self.config.get("benchmark_quality", True),
+                    "benchmark_memory": self.config.get("benchmark_memory", True),
+                }
+            }
+            
+            console.print(f"[bold blue]Running benchmarks...[/bold blue]")
                                                                                                                                                                                     
-        # Run benchmarks                                                                                                                                                              
-        benchmark_results = self._run_benchmarks(                                                                                                                                     
-            optimized_model, optimized_tokenizer,                                                                                                                                     
-            baseline_model, baseline_tokenizer                                                                                                                                        
-        )                                                                                                                                                                             
+            # Run benchmarks                                                                                                                                                              
+            benchmark_results = self._run_benchmarks(                                                                                                                                     
+                optimized_model, optimized_tokenizer,                                                                                                                                     
+                baseline_model, baseline_tokenizer                                                                                                                                        
+            )
+            
+            # Add metadata to results
+            benchmark_results["metadata"] = metadata
                                                                                                                                                                                     
-        # Generate reports                                                                                                                                                            
-        report_paths = self._generate_reports(benchmark_results, output_dir)                                                                                                          
+            # Generate reports                                                                                                                                                            
+            console.print(f"[bold blue]Generating reports...[/bold blue]")
+            report_paths = self._generate_reports(benchmark_results, output_dir)                                                                                                          
                                                                                                                                                                                     
-        logger.info(f"Benchmark reports saved to {output_dir}")                                                                                                                       
+            logger.info(f"Benchmark reports saved to {output_dir}")
+            console.print(f"[bold green]Benchmark reports saved to:[/bold green] {output_dir}")
                                                                                                                                                                                     
-        # Return results                                                                                                                                                              
-        return {                                                                                                                                                                      
-            "model_state": model_state,  # Pass through unchanged                                                                                                                     
-            "metrics": benchmark_results,                                                                                                                                             
-            "artifacts": report_paths                                                                                                                                                 
-        }                                                                                                                                                                             
+            # Return results                                                                                                                                                              
+            return {                                                                                                                                                                      
+                "model_state": model_state,  # Pass through unchanged                                                                                                                     
+                "metrics": benchmark_results,                                                                                                                                             
+                "artifacts": report_paths                                                                                                                                                 
+            }
+            
+        except Exception as e:
+            logger.error(f"Benchmarking failed: {e}")
+            console.print(f"[bold red]Benchmarking failed:[/bold red] {str(e)}")
+            
+            # Create minimal output directory for error report
+            os.makedirs(os.path.join(self.config.get("output_dir", "./outputs"), "benchmarks"), exist_ok=True)
+            
+            # Return error information
+            return {
+                "model_state": model_state,
+                "metrics": {"error": str(e)},
+                "artifacts": {}
+            }
                                                                                                                                                                                     
     def _run_benchmarks(self, optimized_model, optimized_tokenizer, baseline_model, baseline_tokenizer):                                                                              
         """                                                                                                                                                                           
@@ -104,22 +165,51 @@ class BenchmarkingStage(OptimizationStage):
             "quality": {},                                                                                                                                                            
         }                                                                                                                                                                             
                                                                                                                                                                                     
-        # Benchmark latency and throughput                                                                                                                                            
-        results["latency"], results["throughput"] = self._benchmark_performance(                                                                                                      
-            optimized_model, baseline_model                                                                                                                                           
-        )                                                                                                                                                                             
+        # Benchmark latency and throughput
+        console.print("[bold]Running performance benchmarks...[/bold]")
+        try:
+            results["latency"], results["throughput"] = self._benchmark_performance(                                                                                                      
+                optimized_model, baseline_model                                                                                                                                           
+            )
+            console.print("[green]✓[/green] Performance benchmarks completed")
+        except Exception as e:
+            logger.error(f"Performance benchmarking failed: {e}")
+            console.print(f"[bold red]Performance benchmarking failed:[/bold red] {str(e)}")
+            results["latency"] = {"error": str(e)}
+            results["throughput"] = {"error": str(e)}
                                                                                                                                                                                     
-        # Benchmark memory usage                                                                                                                                                      
-        results["memory"] = self._benchmark_memory(                                                                                                                                   
-            optimized_model, baseline_model                                                                                                                                           
-        )                                                                                                                                                                             
+        # Benchmark memory usage (if enabled)
+        if self.config.get("benchmark_memory", True):
+            console.print("[bold]Running memory benchmarks...[/bold]")
+            try:
+                results["memory"] = self._benchmark_memory(                                                                                                                   
+                    optimized_model, baseline_model                                                                                                                           
+                )
+                console.print("[green]✓[/green] Memory benchmarks completed")
+            except Exception as e:
+                logger.error(f"Memory benchmarking failed: {e}")
+                console.print(f"[bold red]Memory benchmarking failed:[/bold red] {str(e)}")
+                results["memory"] = {"error": str(e)}
+        else:
+            console.print("[yellow]Skipping memory benchmarks (disabled in config)[/yellow]")
+            results["memory"] = {"status": "skipped"}
                                                                                                                                                                                     
         # Benchmark quality (if enabled)                                                                                                                                              
-        if self.config.get("benchmark_quality", True):                                                                                                                                
-            results["quality"] = self._benchmark_quality(                                                                                                                             
-                optimized_model, optimized_tokenizer,                                                                                                                                 
-                baseline_model, baseline_tokenizer                                                                                                                                    
-            )                                                                                                                                                                         
+        if self.config.get("benchmark_quality", True):
+            console.print("[bold]Running quality benchmarks...[/bold]")
+            try:
+                results["quality"] = self._benchmark_quality(                                                                                                                             
+                    optimized_model, optimized_tokenizer,                                                                                                                                 
+                    baseline_model, baseline_tokenizer                                                                                                                                    
+                )
+                console.print("[green]✓[/green] Quality benchmarks completed")
+            except Exception as e:
+                logger.error(f"Quality benchmarking failed: {e}")
+                console.print(f"[bold red]Quality benchmarking failed:[/bold red] {str(e)}")
+                results["quality"] = {"error": str(e)}
+        else:
+            console.print("[yellow]Skipping quality benchmarks (disabled in config)[/yellow]")
+            results["quality"] = {"status": "skipped"}
                                                                                                                                                                                     
         return results                                                                                                                                                                
                                                                                                                                                                                     
@@ -235,29 +325,56 @@ class BenchmarkingStage(OptimizationStage):
             Tuple of (latency_ms, throughput_samples_per_sec)                                                                                                                         
         """                                                                                                                                                                           
         batch_size = input_ids.size(0)                                                                                                                                                
+        
+        try:
+            # Warm-up - with error handling
+            for i in range(3):
+                try:
+                    with torch.no_grad():
+                        _ = model(input_ids)
+                except Exception as e:
+                    logger.warning(f"Warm-up iteration {i} failed: {e}")
+                    # Continue with benchmarking despite warm-up failure
+                    break
                                                                                                                                                                                     
-        # Warm-up                                                                                                                                                                     
-        for _ in range(3):                                                                                                                                                            
-            with torch.no_grad():                                                                                                                                                     
-                _ = model(input_ids)                                                                                                                                                  
+            # Measure performance                                                                                                                                                         
+            torch.cuda.synchronize() if torch.cuda.is_available() else None                                                                                                               
+            start_time = time.time()
+            
+            # Track successful iterations
+            successful_iterations = 0
                                                                                                                                                                                     
-        # Measure performance                                                                                                                                                         
-        torch.cuda.synchronize() if torch.cuda.is_available() else None                                                                                                               
-        start_time = time.time()                                                                                                                                                      
+            for i in range(num_iterations):
+                try:
+                    with torch.no_grad():                                                                                                                                                     
+                        _ = model(input_ids)
+                    successful_iterations += 1
+                except Exception as e:
+                    logger.error(f"Benchmark iteration {i} failed: {e}")
+                    # Continue with remaining iterations
                                                                                                                                                                                     
-        for _ in range(num_iterations):                                                                                                                                               
-            with torch.no_grad():                                                                                                                                                     
-                _ = model(input_ids)                                                                                                                                                  
+            torch.cuda.synchronize() if torch.cuda.is_available() else None                                                                                                               
+            end_time = time.time()                                                                                                                                                        
                                                                                                                                                                                     
-        torch.cuda.synchronize() if torch.cuda.is_available() else None                                                                                                               
-        end_time = time.time()                                                                                                                                                        
+            # Calculate metrics - handle case where all iterations failed                                                                                                                                                                           
+            total_time = end_time - start_time
+            
+            if successful_iterations == 0:
+                logger.error("All benchmark iterations failed")
+                return float('inf'), 0.0  # Indicate failure with infinite latency and zero throughput
+                
+            # Calculate based on successful iterations only
+            latency_ms = (total_time / successful_iterations) * 1000                                                                                                                             
+            throughput = (batch_size * successful_iterations) / total_time
+            
+            logger.info(f"Performance: {latency_ms:.2f}ms latency, {throughput:.2f} samples/sec "
+                       f"({successful_iterations}/{num_iterations} successful iterations)")
                                                                                                                                                                                     
-        # Calculate metrics                                                                                                                                                           
-        total_time = end_time - start_time                                                                                                                                            
-        latency_ms = (total_time / num_iterations) * 1000                                                                                                                             
-        throughput = (batch_size * num_iterations) / total_time                                                                                                                       
-                                                                                                                                                                                    
-        return latency_ms, throughput                                                                                                                                                 
+            return latency_ms, throughput
+            
+        except Exception as e:
+            logger.error(f"Performance measurement failed: {e}")
+            return float('inf'), 0.0  # Indicate failure with infinite latency and zero throughput
                                                                                                                                                                                     
     def _benchmark_memory(self, optimized_model, baseline_model):                                                                                                                     
         """                                                                                                                                                                           
@@ -269,69 +386,148 @@ class BenchmarkingStage(OptimizationStage):
                                                                                                                                                                                     
         Returns:                                                                                                                                                                      
             Dictionary of memory usage results                                                                                                                                        
-        """                                                                                                                                                                           
-        # Get model sizes                                                                                                                                                             
-        opt_size = self._get_model_size(optimized_model)                                                                                                                              
-        base_size = self._get_model_size(baseline_model)                                                                                                                              
+        """
+        try:
+            # Get model sizes with error handling
+            try:
+                opt_size = self._get_model_size(optimized_model)
+                logger.info(f"Optimized model size: {opt_size:.2f} MB")
+            except Exception as e:
+                logger.error(f"Error measuring optimized model size: {e}")
+                opt_size = 0
+                
+            try:
+                base_size = self._get_model_size(baseline_model)
+                logger.info(f"Baseline model size: {base_size:.2f} MB")
+            except Exception as e:
+                logger.error(f"Error measuring baseline model size: {e}")
+                base_size = 0
                                                                                                                                                                                     
-        # Measure GPU memory if available                                                                                                                                             
-        opt_gpu_memory = 0                                                                                                                                                            
-        base_gpu_memory = 0                                                                                                                                                           
+            # Measure GPU memory if available                                                                                                                                             
+            opt_gpu_memory = 0                                                                                                                                                            
+            base_gpu_memory = 0                                                                                                                                                           
                                                                                                                                                                                     
-        if torch.cuda.is_available():                                                                                                                                                 
-            # Measure optimized model GPU memory                                                                                                                                      
-            torch.cuda.reset_peak_memory_stats()                                                                                                                                      
-            torch.cuda.empty_cache()                                                                                                                                                  
+            if torch.cuda.is_available():
+                try:
+                    # Measure optimized model GPU memory                                                                                                                                      
+                    torch.cuda.reset_peak_memory_stats()                                                                                                                                      
+                    torch.cuda.empty_cache()                                                                                                                                                  
                                                                                                                                                                                     
-            # Run a forward pass to allocate memory                                                                                                                                   
-            input_ids = torch.randint(                                                                                                                                                
-                100, 1000,                                                                                                                                                            
-                (1, 512),                                                                                                                                                             
-                device=optimized_model.device                                                                                                                                         
-            )                                                                                                                                                                         
-            with torch.no_grad():                                                                                                                                                     
-                _ = optimized_model(input_ids)                                                                                                                                        
+                    # Run a forward pass to allocate memory                                                                                                                                   
+                    input_ids = torch.randint(                                                                                                                                                
+                        100, 1000,                                                                                                                                                            
+                        (1, 512),                                                                                                                                                             
+                        device=optimized_model.device                                                                                                                                         
+                    )                                                                                                                                                                         
+                    with torch.no_grad():                                                                                                                                                     
+                        _ = optimized_model(input_ids)                                                                                                                                        
                                                                                                                                                                                     
-            torch.cuda.synchronize()                                                                                                                                                  
-            opt_gpu_memory = torch.cuda.max_memory_allocated() / 1024 / 1024                                                                                                          
+                    torch.cuda.synchronize()                                                                                                                                                  
+                    opt_gpu_memory = torch.cuda.max_memory_allocated() / 1024 / 1024
+                    logger.info(f"Optimized model GPU memory: {opt_gpu_memory:.2f} MB")
+                except Exception as e:
+                    logger.error(f"Error measuring optimized model GPU memory: {e}")
+                    opt_gpu_memory = 0
+                
+                try:
+                    # Measure baseline model GPU memory                                                                                                                                       
+                    torch.cuda.reset_peak_memory_stats()                                                                                                                                      
+                    torch.cuda.empty_cache()                                                                                                                                                  
                                                                                                                                                                                     
-            # Measure baseline model GPU memory                                                                                                                                       
-            torch.cuda.reset_peak_memory_stats()                                                                                                                                      
-            torch.cuda.empty_cache()                                                                                                                                                  
+                    # Run a forward pass to allocate memory                                                                                                                                   
+                    with torch.no_grad():                                                                                                                                                     
+                        _ = baseline_model(input_ids)                                                                                                                                         
                                                                                                                                                                                     
-            # Run a forward pass to allocate memory                                                                                                                                   
-            with torch.no_grad():                                                                                                                                                     
-                _ = baseline_model(input_ids)                                                                                                                                         
+                    torch.cuda.synchronize()                                                                                                                                                  
+                    base_gpu_memory = torch.cuda.max_memory_allocated() / 1024 / 1024
+                    logger.info(f"Baseline model GPU memory: {base_gpu_memory:.2f} MB")
+                except Exception as e:
+                    logger.error(f"Error measuring baseline model GPU memory: {e}")
+                    base_gpu_memory = 0
+            
+            # Calculate reductions safely
+            if base_size > 0:
+                size_reduction = (base_size - opt_size) / base_size
+            else:
+                size_reduction = 0 if opt_size == 0 else float('inf')
+                
+            if base_gpu_memory > 0:
+                gpu_reduction = (base_gpu_memory - opt_gpu_memory) / base_gpu_memory
+            else:
+                gpu_reduction = 0 if opt_gpu_memory == 0 else float('inf')
                                                                                                                                                                                     
-            torch.cuda.synchronize()                                                                                                                                                  
-            base_gpu_memory = torch.cuda.max_memory_allocated() / 1024 / 1024                                                                                                         
-                                                                                                                                                                                    
-        return {                                                                                                                                                                      
-            "model_size_mb": {                                                                                                                                                        
-                "optimized": opt_size,                                                                                                                                                
-                "baseline": base_size,                                                                                                                                                
-                "reduction": (base_size - opt_size) / base_size if base_size > 0 else 0,                                                                                              
-            },                                                                                                                                                                        
-            "gpu_memory_mb": {                                                                                                                                                        
-                "optimized": opt_gpu_memory,                                                                                                                                          
-                "baseline": base_gpu_memory,                                                                                                                                          
-                "reduction": (base_gpu_memory - opt_gpu_memory) / base_gpu_memory if base_gpu_memory > 0 else 0,                                                                      
-            }                                                                                                                                                                         
-        }                                                                                                                                                                             
+            return {                                                                                                                                                                      
+                "model_size_mb": {                                                                                                                                                        
+                    "optimized": opt_size,                                                                                                                                                
+                    "baseline": base_size,                                                                                                                                                
+                    "reduction": size_reduction,
+                    "reduction_mb": base_size - opt_size,
+                },                                                                                                                                                                        
+                "gpu_memory_mb": {                                                                                                                                                        
+                    "optimized": opt_gpu_memory,                                                                                                                                          
+                    "baseline": base_gpu_memory,                                                                                                                                          
+                    "reduction": gpu_reduction,
+                    "reduction_mb": base_gpu_memory - opt_gpu_memory,
+                }                                                                                                                                                                         
+            }
+            
+        except Exception as e:
+            logger.error(f"Memory benchmarking failed: {e}")
+            return {
+                "model_size_mb": {"error": str(e)},
+                "gpu_memory_mb": {"error": str(e)}
+            }
                                                                                                                                                                                     
     def _get_model_size(self, model):                                                                                                                                                 
-        """Calculate the size of a model in MB."""                                                                                                                                    
-        param_size = 0                                                                                                                                                                
-        for param in model.parameters():                                                                                                                                              
-            param_size += param.nelement() * param.element_size()                                                                                                                     
+        """Calculate the size of a model in MB."""
+        try:
+            # Check if model has parameters() method
+            if not hasattr(model, 'parameters'):
+                # Try to get size from model attributes
+                if hasattr(model, 'model_size_mb'):
+                    return model.model_size_mb
+                elif hasattr(model, 'model') and hasattr(model.model, 'model_size_mb'):
+                    return model.model.model_size_mb
+                else:
+                    logger.warning(f"Cannot determine size for model type: {type(model)}")
+                    return 0
+                    
+            # Standard parameter counting for PyTorch models
+            param_size = 0                                                                                                                                                                
+            param_count = 0
+            for param in model.parameters():
+                param_count += 1                                                                                                                                              
+                param_size += param.nelement() * param.element_size()
+            
+            logger.debug(f"Model has {param_count} parameter tensors")
                                                                                                                                                                                     
-        buffer_size = 0                                                                                                                                                               
-        for buffer in model.buffers():                                                                                                                                                
-            buffer_size += buffer.nelement() * buffer.element_size()                                                                                                                  
+            buffer_size = 0
+            buffer_count = 0                                                                                                                                                               
+            for buffer in model.buffers():
+                buffer_count += 1                                                                                                                                                
+                buffer_size += buffer.nelement() * buffer.element_size()
+                
+            logger.debug(f"Model has {buffer_count} buffer tensors")
                                                                                                                                                                                     
-        size_mb = (param_size + buffer_size) / 1024 / 1024                                                                                                                            
+            size_mb = (param_size + buffer_size) / 1024 / 1024
+            
+            # Special case for GGUF models which might not report correct size through parameters
+            if size_mb < 1.0 and hasattr(model, 'model') and hasattr(model.model, 'model_path'):
+                # Try to get file size for GGUF models
+                try:
+                    import os
+                    if os.path.exists(model.model.model_path):
+                        file_size_mb = os.path.getsize(model.model.model_path) / 1024 / 1024
+                        logger.info(f"Using GGUF file size: {file_size_mb:.2f} MB")
+                        return file_size_mb
+                except Exception as e:
+                    logger.warning(f"Failed to get GGUF file size: {e}")
                                                                                                                                                                                     
-        return size_mb                                                                                                                                                                
+            return size_mb
+            
+        except Exception as e:
+            logger.error(f"Error calculating model size: {e}")
+            return 0
                                                                                                                                                                                     
     def _benchmark_quality(self, optimized_model, optimized_tokenizer, baseline_model, baseline_tokenizer):                                                                           
         """                                                                                                                                                                           
@@ -346,45 +542,86 @@ class BenchmarkingStage(OptimizationStage):
         Returns:                                                                                                                                                                      
             Dictionary of quality benchmark results                                                                                                                                   
         """                                                                                                                                                                           
-        from llm_optimizer.evaluation import ModelEvaluator                                                                                                                           
+        try:
+            from llm_optimizer.evaluation import ModelEvaluator                                                                                                                           
                                                                                                                                                                                     
-        # Create evaluator                                                                                                                                                            
-        evaluator = ModelEvaluator(self.config)                                                                                                                                       
+            # Create evaluator                                                                                                                                                            
+            evaluator = ModelEvaluator(self.config)                                                                                                                                       
                                                                                                                                                                                     
-        # Save models temporarily if needed                                                                                                                                           
-        temp_dir = os.path.join(self.config.get("output_dir", "./outputs"), "temp")                                                                                                   
-        os.makedirs(temp_dir, exist_ok=True)                                                                                                                                          
+            # Save models temporarily if needed                                                                                                                                           
+            temp_dir = os.path.join(self.config.get("output_dir", "./outputs"), "temp")                                                                                                   
+            os.makedirs(temp_dir, exist_ok=True)                                                                                                                                          
                                                                                                                                                                                     
-        opt_temp_dir = os.path.join(temp_dir, "optimized")                                                                                                                            
-        base_temp_dir = os.path.join(temp_dir, "baseline")                                                                                                                            
+            opt_temp_dir = os.path.join(temp_dir, "optimized")                                                                                                                            
+            base_temp_dir = os.path.join(temp_dir, "baseline")                                                                                                                            
                                                                                                                                                                                     
-        os.makedirs(opt_temp_dir, exist_ok=True)                                                                                                                                      
-        os.makedirs(base_temp_dir, exist_ok=True)                                                                                                                                     
-        
-        # Handle different model types for saving
-        self._save_model_with_format_detection(optimized_model, optimized_tokenizer, opt_temp_dir)
-        self._save_model_with_format_detection(baseline_model, baseline_tokenizer, base_temp_dir)
+            os.makedirs(opt_temp_dir, exist_ok=True)                                                                                                                                      
+            os.makedirs(base_temp_dir, exist_ok=True)                                                                                                                                     
+            
+            # Handle different model types for saving
+            self._save_model_with_format_detection(optimized_model, optimized_tokenizer, opt_temp_dir)
+            self._save_model_with_format_detection(baseline_model, baseline_tokenizer, base_temp_dir)
                                                                                                                                                                                     
-        # Evaluate models                                                                                                                                                             
-        opt_metrics = evaluator.evaluate(opt_temp_dir)                                                                                                                                
-        base_metrics = evaluator.evaluate(base_temp_dir)                                                                                                                              
+            # Evaluate models - use separate try/except blocks to handle individual failures
+            opt_metrics = {}
+            base_metrics = {}
+            
+            try:
+                logger.info("Evaluating optimized model...")
+                opt_metrics = evaluator.evaluate(opt_temp_dir)
+            except Exception as e:
+                logger.error(f"Error evaluating optimized model: {e}")
+                opt_metrics = {"error": str(e)}
+                
+            try:
+                logger.info("Evaluating baseline model...")
+                base_metrics = evaluator.evaluate(base_temp_dir)
+            except Exception as e:
+                logger.error(f"Error evaluating baseline model: {e}")
+                base_metrics = {"error": str(e)}
                                                                                                                                                                                     
-        # Compare results                                                                                                                                                             
-        quality_results = {}                                                                                                                                                          
+            # Compare results                                                                                                                                                             
+            quality_results = {}                                                                                                                                                          
                                                                                                                                                                                     
-        for metric in opt_metrics:                                                                                                                                                    
-            if metric in base_metrics:                                                                                                                                                
-                quality_results[metric] = {                                                                                                                                           
-                    "optimized": opt_metrics[metric],                                                                                                                                 
-                    "baseline": base_metrics[metric],                                                                                                                                 
-                }                                                                                                                                                                     
+            # Add error information if present
+            if "error" in opt_metrics:
+                quality_results["optimized_model_error"] = {"error": opt_metrics["error"]}
+                
+            if "error" in base_metrics:
+                quality_results["baseline_model_error"] = {"error": base_metrics["error"]}
+            
+            # Process metrics that are present in both results
+            for metric in opt_metrics:
+                if metric == "error":
+                    continue
+                    
+                if metric in base_metrics:
+                    # Skip NaN values
+                    if (isinstance(opt_metrics[metric], float) and np.isnan(opt_metrics[metric])) or \
+                       (isinstance(base_metrics[metric], float) and np.isnan(base_metrics[metric])):
+                        quality_results[metric] = {
+                            "optimized": opt_metrics[metric],
+                            "baseline": base_metrics[metric],
+                            "status": "NaN values detected"
+                        }
+                        continue
+                        
+                    quality_results[metric] = {                                                                                                                                           
+                        "optimized": opt_metrics[metric],                                                                                                                                 
+                        "baseline": base_metrics[metric],                                                                                                                                 
+                    }                                                                                                                                                                     
                                                                                                                                                                                     
-                # Calculate relative difference                                                                                                                                       
-                if base_metrics[metric] != 0:                                                                                                                                         
-                    rel_diff = (opt_metrics[metric] - base_metrics[metric]) / base_metrics[metric]                                                                                    
-                    quality_results[metric]["relative_diff"] = rel_diff                                                                                                               
-                                                                                                                                                                                    
-        return quality_results                                                                                                                                                        
+                    # Calculate relative difference only for non-zero, non-NaN values                                                                                                                      
+                    if isinstance(base_metrics[metric], (int, float)) and base_metrics[metric] != 0 and \
+                       isinstance(opt_metrics[metric], (int, float)):
+                        rel_diff = (opt_metrics[metric] - base_metrics[metric]) / base_metrics[metric]                                                                                    
+                        quality_results[metric]["relative_diff"] = rel_diff                                                                                                               
+            
+            return quality_results
+            
+        except Exception as e:
+            logger.error(f"Quality benchmarking failed: {e}")
+            return {"benchmark_error": str(e)}
                                                                                                                                                                                     
     def _generate_reports(self, benchmark_results, output_dir):                                                                                                                       
         """                                                                                                                                                                           
