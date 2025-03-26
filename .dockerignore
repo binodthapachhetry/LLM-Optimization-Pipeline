@@ -52,4 +52,64 @@
  *.pt                                                                                                                                                                                  
  *.pth                                                                                                                                                                                 
  *.onnx                                                                                                                                                                                
- *.gguf 
+ *.gguf # Version control
+.git
+.github
+.gitignore
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+venv_*/
+.venv/
+.env
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Output directories
+outputs/
+logs/
+runs/
+wandb/
+
+# Large model files
+*.bin
+*.pt
+*.pth
+*.onnx
+*.gguf
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Test files
+tests/
