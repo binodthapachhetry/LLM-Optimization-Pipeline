@@ -1,0 +1,815 @@
+[
+  {
+    "prompt": "The capital of France is",
+    "expected_completion": "Paris",
+    "generated_text": "The capital of France is Paris. The Eiffel Tower is located in Paris. The Louvre Museum is also located in Paris. The famous French artist Claude Monet was born in Paris. The famous French writer Victor Hugo was born in Paris. The famous French composer Claude",
+    "completion": "Paris. The Eiffel Tower is located in Paris. The Louvre Museum is also located in Paris. The famous French artist Claude Monet was born in Paris. The famous French writer Victor Hugo was born in Paris. The famous French composer Claude",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "The capital of France is",
+      "tokens": [
+        "The",
+        "\u0120capital",
+        "\u0120of",
+        "\u0120France",
+        "\u0120is"
+      ],
+      "token_ids": [
+        128000,
+        791,
+        6864,
+        315,
+        9822,
+        374
+      ],
+      "decoded": "<|begin_of_text|>The capital of France is",
+      "is_reversible": false
+    },
+    "example_id": 0,
+    "parameters": {
+      "temperature": 0.0,
+      "do_sample": false
+    }
+  },
+  {
+    "prompt": "The capital of France is",
+    "error": "`temperature` (=0.0) has to be a strictly positive float, otherwise your next token scores will be invalid. If you're looking for greedy decoding strategies, set `do_sample=False`.",
+    "example_id": 0,
+    "parameters": {
+      "temperature": 0.0,
+      "do_sample": true
+    }
+  },
+  {
+    "prompt": "The capital of France is",
+    "expected_completion": "Paris",
+    "generated_text": "The capital of France is Paris. The Eiffel Tower is located in Paris. The Louvre Museum is also located in Paris. The famous French artist Claude Monet was born in Paris. The famous French writer Victor Hugo was born in Paris. The famous French composer Claude",
+    "completion": "Paris. The Eiffel Tower is located in Paris. The Louvre Museum is also located in Paris. The famous French artist Claude Monet was born in Paris. The famous French writer Victor Hugo was born in Paris. The famous French composer Claude",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "The capital of France is",
+      "tokens": [
+        "The",
+        "\u0120capital",
+        "\u0120of",
+        "\u0120France",
+        "\u0120is"
+      ],
+      "token_ids": [
+        128000,
+        791,
+        6864,
+        315,
+        9822,
+        374
+      ],
+      "decoded": "<|begin_of_text|>The capital of France is",
+      "is_reversible": false
+    },
+    "example_id": 0,
+    "parameters": {
+      "temperature": 0.7,
+      "do_sample": false
+    }
+  },
+  {
+    "prompt": "The capital of France is",
+    "expected_completion": "Paris",
+    "generated_text": "The capital of France is Paris.\nThe capital of France is Paris, which is also the city where many famous artists and writers lived. The most famous is probably Leonardo da Vinci, who lived there for a time. Other famous residents include Vincent van Gogh and Claude Monet",
+    "completion": "Paris.\nThe capital of France is Paris, which is also the city where many famous artists and writers lived. The most famous is probably Leonardo da Vinci, who lived there for a time. Other famous residents include Vincent van Gogh and Claude Monet",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "The capital of France is",
+      "tokens": [
+        "The",
+        "\u0120capital",
+        "\u0120of",
+        "\u0120France",
+        "\u0120is"
+      ],
+      "token_ids": [
+        128000,
+        791,
+        6864,
+        315,
+        9822,
+        374
+      ],
+      "decoded": "<|begin_of_text|>The capital of France is",
+      "is_reversible": false
+    },
+    "example_id": 0,
+    "parameters": {
+      "temperature": 0.7,
+      "do_sample": true
+    }
+  },
+  {
+    "prompt": "Water boils at 100 degrees",
+    "expected_completion": "Celsius",
+    "generated_text": "Water boils at 100 degrees Celsius at standard atmospheric pressure. At standard atmospheric pressure, water boils at 100 degrees Celsius at sea level. This is because the atmospheric pressure is the pressure exerted by the weight of the air in the atmosphere, and the boiling point of water is",
+    "completion": "Celsius at standard atmospheric pressure. At standard atmospheric pressure, water boils at 100 degrees Celsius at sea level. This is because the atmospheric pressure is the pressure exerted by the weight of the air in the atmosphere, and the boiling point of water is",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "Water boils at 100 degrees",
+      "tokens": [
+        "Water",
+        "\u0120boils",
+        "\u0120at",
+        "\u0120",
+        "100",
+        "\u0120degrees"
+      ],
+      "token_ids": [
+        128000,
+        29353,
+        90055,
+        520,
+        220,
+        1041,
+        12628
+      ],
+      "decoded": "<|begin_of_text|>Water boils at 100 degrees",
+      "is_reversible": false
+    },
+    "example_id": 1,
+    "parameters": {
+      "temperature": 0.0,
+      "do_sample": false
+    }
+  },
+  {
+    "prompt": "Water boils at 100 degrees",
+    "error": "`temperature` (=0.0) has to be a strictly positive float, otherwise your next token scores will be invalid. If you're looking for greedy decoding strategies, set `do_sample=False`.",
+    "example_id": 1,
+    "parameters": {
+      "temperature": 0.0,
+      "do_sample": true
+    }
+  },
+  {
+    "prompt": "Water boils at 100 degrees",
+    "expected_completion": "Celsius",
+    "generated_text": "Water boils at 100 degrees Celsius at standard atmospheric pressure. At standard atmospheric pressure, water boils at 100 degrees Celsius at sea level. This is because the atmospheric pressure is the pressure exerted by the weight of the air in the atmosphere, and the boiling point of water is",
+    "completion": "Celsius at standard atmospheric pressure. At standard atmospheric pressure, water boils at 100 degrees Celsius at sea level. This is because the atmospheric pressure is the pressure exerted by the weight of the air in the atmosphere, and the boiling point of water is",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "Water boils at 100 degrees",
+      "tokens": [
+        "Water",
+        "\u0120boils",
+        "\u0120at",
+        "\u0120",
+        "100",
+        "\u0120degrees"
+      ],
+      "token_ids": [
+        128000,
+        29353,
+        90055,
+        520,
+        220,
+        1041,
+        12628
+      ],
+      "decoded": "<|begin_of_text|>Water boils at 100 degrees",
+      "is_reversible": false
+    },
+    "example_id": 1,
+    "parameters": {
+      "temperature": 0.7,
+      "do_sample": false
+    }
+  },
+  {
+    "prompt": "Water boils at 100 degrees",
+    "expected_completion": "Celsius",
+    "generated_text": "Water boils at 100 degrees Celsius at sea level, but it can boil at a higher temperature depending on atmospheric pressure.\n\nAt 1000 meters, water boils at 100 degrees Celsius, and at 1100 meters, it boils at 104 degrees Celsius.\n\nNote: The",
+    "completion": "Celsius at sea level, but it can boil at a higher temperature depending on atmospheric pressure.\n\nAt 1000 meters, water boils at 100 degrees Celsius, and at 1100 meters, it boils at 104 degrees Celsius.\n\nNote: The",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "Water boils at 100 degrees",
+      "tokens": [
+        "Water",
+        "\u0120boils",
+        "\u0120at",
+        "\u0120",
+        "100",
+        "\u0120degrees"
+      ],
+      "token_ids": [
+        128000,
+        29353,
+        90055,
+        520,
+        220,
+        1041,
+        12628
+      ],
+      "decoded": "<|begin_of_text|>Water boils at 100 degrees",
+      "is_reversible": false
+    },
+    "example_id": 1,
+    "parameters": {
+      "temperature": 0.7,
+      "do_sample": true
+    }
+  },
+  {
+    "prompt": "The opposite of hot is",
+    "expected_completion": "cold",
+    "generated_text": "The opposite of hot is cold. The opposite of cold is hot. Therefore, the opposite of hot is cold.\n\n## Step 1: Understand the concept of opposite in terms of temperature.\nThe concept of opposite in terms of temperature implies that two temperatures are the same when they",
+    "completion": "cold. The opposite of cold is hot. Therefore, the opposite of hot is cold.\n\n## Step 1: Understand the concept of opposite in terms of temperature.\nThe concept of opposite in terms of temperature implies that two temperatures are the same when they",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "The opposite of hot is",
+      "tokens": [
+        "The",
+        "\u0120opposite",
+        "\u0120of",
+        "\u0120hot",
+        "\u0120is"
+      ],
+      "token_ids": [
+        128000,
+        791,
+        14329,
+        315,
+        4106,
+        374
+      ],
+      "decoded": "<|begin_of_text|>The opposite of hot is",
+      "is_reversible": false
+    },
+    "example_id": 2,
+    "parameters": {
+      "temperature": 0.0,
+      "do_sample": false
+    }
+  },
+  {
+    "prompt": "The opposite of hot is",
+    "error": "`temperature` (=0.0) has to be a strictly positive float, otherwise your next token scores will be invalid. If you're looking for greedy decoding strategies, set `do_sample=False`.",
+    "example_id": 2,
+    "parameters": {
+      "temperature": 0.0,
+      "do_sample": true
+    }
+  },
+  {
+    "prompt": "The opposite of hot is",
+    "expected_completion": "cold",
+    "generated_text": "The opposite of hot is cold. The opposite of cold is hot. Therefore, the opposite of hot is cold.\n\n## Step 1: Understand the concept of opposite in terms of temperature.\nThe concept of opposite in terms of temperature implies that two temperatures are the same when they",
+    "completion": "cold. The opposite of cold is hot. Therefore, the opposite of hot is cold.\n\n## Step 1: Understand the concept of opposite in terms of temperature.\nThe concept of opposite in terms of temperature implies that two temperatures are the same when they",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "The opposite of hot is",
+      "tokens": [
+        "The",
+        "\u0120opposite",
+        "\u0120of",
+        "\u0120hot",
+        "\u0120is"
+      ],
+      "token_ids": [
+        128000,
+        791,
+        14329,
+        315,
+        4106,
+        374
+      ],
+      "decoded": "<|begin_of_text|>The opposite of hot is",
+      "is_reversible": false
+    },
+    "example_id": 2,
+    "parameters": {
+      "temperature": 0.7,
+      "do_sample": false
+    }
+  },
+  {
+    "prompt": "The opposite of hot is",
+    "expected_completion": "cold",
+    "generated_text": "The opposite of hot is cold.\nThe opposite of fast is slow.\nThe opposite of a lie is truth.\nThe opposite of a false statement is true.\nThe opposite of a good thing is a bad thing.\nThe opposite of a good deed is a bad deed.\nThe opposite",
+    "completion": "cold.\nThe opposite of fast is slow.\nThe opposite of a lie is truth.\nThe opposite of a false statement is true.\nThe opposite of a good thing is a bad thing.\nThe opposite of a good deed is a bad deed.\nThe opposite",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "The opposite of hot is",
+      "tokens": [
+        "The",
+        "\u0120opposite",
+        "\u0120of",
+        "\u0120hot",
+        "\u0120is"
+      ],
+      "token_ids": [
+        128000,
+        791,
+        14329,
+        315,
+        4106,
+        374
+      ],
+      "decoded": "<|begin_of_text|>The opposite of hot is",
+      "is_reversible": false
+    },
+    "example_id": 2,
+    "parameters": {
+      "temperature": 0.7,
+      "do_sample": true
+    }
+  },
+  {
+    "prompt": "To calculate the area of a rectangle, multiply the length by the",
+    "expected_completion": "width",
+    "generated_text": "To calculate the area of a rectangle, multiply the length by the width.\n\n## Step 1: Identify the formula for the area of a rectangle.\nThe formula for the area of a rectangle is length times width.\n\n## Step 2: Determine the variables in the formula.\nIn this problem, the length is represented",
+    "completion": "width.\n\n## Step 1: Identify the formula for the area of a rectangle.\nThe formula for the area of a rectangle is length times width.\n\n## Step 2: Determine the variables in the formula.\nIn this problem, the length is represented",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "To calculate the area of a rectangle, multiply the length by the",
+      "tokens": [
+        "To",
+        "\u0120calculate",
+        "\u0120the",
+        "\u0120area",
+        "\u0120of",
+        "\u0120a",
+        "\u0120rectangle",
+        ",",
+        "\u0120multiply",
+        "\u0120the",
+        "\u0120length",
+        "\u0120by",
+        "\u0120the"
+      ],
+      "token_ids": [
+        128000,
+        1271,
+        11294,
+        279,
+        3158,
+        315,
+        264,
+        23596,
+        11,
+        31370,
+        279,
+        3160,
+        555,
+        279
+      ],
+      "decoded": "<|begin_of_text|>To calculate the area of a rectangle, multiply the length by the",
+      "is_reversible": false
+    },
+    "example_id": 3,
+    "parameters": {
+      "temperature": 0.0,
+      "do_sample": false
+    }
+  },
+  {
+    "prompt": "To calculate the area of a rectangle, multiply the length by the",
+    "error": "`temperature` (=0.0) has to be a strictly positive float, otherwise your next token scores will be invalid. If you're looking for greedy decoding strategies, set `do_sample=False`.",
+    "example_id": 3,
+    "parameters": {
+      "temperature": 0.0,
+      "do_sample": true
+    }
+  },
+  {
+    "prompt": "To calculate the area of a rectangle, multiply the length by the",
+    "expected_completion": "width",
+    "generated_text": "To calculate the area of a rectangle, multiply the length by the width.\n\n## Step 1: Identify the formula for the area of a rectangle.\nThe formula for the area of a rectangle is length times width.\n\n## Step 2: Determine the variables in the formula.\nIn this problem, the length is represented",
+    "completion": "width.\n\n## Step 1: Identify the formula for the area of a rectangle.\nThe formula for the area of a rectangle is length times width.\n\n## Step 2: Determine the variables in the formula.\nIn this problem, the length is represented",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "To calculate the area of a rectangle, multiply the length by the",
+      "tokens": [
+        "To",
+        "\u0120calculate",
+        "\u0120the",
+        "\u0120area",
+        "\u0120of",
+        "\u0120a",
+        "\u0120rectangle",
+        ",",
+        "\u0120multiply",
+        "\u0120the",
+        "\u0120length",
+        "\u0120by",
+        "\u0120the"
+      ],
+      "token_ids": [
+        128000,
+        1271,
+        11294,
+        279,
+        3158,
+        315,
+        264,
+        23596,
+        11,
+        31370,
+        279,
+        3160,
+        555,
+        279
+      ],
+      "decoded": "<|begin_of_text|>To calculate the area of a rectangle, multiply the length by the",
+      "is_reversible": false
+    },
+    "example_id": 3,
+    "parameters": {
+      "temperature": 0.7,
+      "do_sample": false
+    }
+  },
+  {
+    "prompt": "To calculate the area of a rectangle, multiply the length by the",
+    "expected_completion": "width",
+    "generated_text": "To calculate the area of a rectangle, multiply the length by the width.\n\n## Step 1: Identify the formula for the area of a rectangle.\nThe area of a rectangle is calculated by multiplying its length by its width.\n\n## Step 2: Identify the variables in the formula.\nIn this case, the length",
+    "completion": "width.\n\n## Step 1: Identify the formula for the area of a rectangle.\nThe area of a rectangle is calculated by multiplying its length by its width.\n\n## Step 2: Identify the variables in the formula.\nIn this case, the length",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "To calculate the area of a rectangle, multiply the length by the",
+      "tokens": [
+        "To",
+        "\u0120calculate",
+        "\u0120the",
+        "\u0120area",
+        "\u0120of",
+        "\u0120a",
+        "\u0120rectangle",
+        ",",
+        "\u0120multiply",
+        "\u0120the",
+        "\u0120length",
+        "\u0120by",
+        "\u0120the"
+      ],
+      "token_ids": [
+        128000,
+        1271,
+        11294,
+        279,
+        3158,
+        315,
+        264,
+        23596,
+        11,
+        31370,
+        279,
+        3160,
+        555,
+        279
+      ],
+      "decoded": "<|begin_of_text|>To calculate the area of a rectangle, multiply the length by the",
+      "is_reversible": false
+    },
+    "example_id": 3,
+    "parameters": {
+      "temperature": 0.7,
+      "do_sample": true
+    }
+  },
+  {
+    "prompt": "The primary colors are red, blue, and",
+    "expected_completion": "yellow",
+    "generated_text": "The primary colors are red, blue, and yellow. These colors are called primary because they cannot be created by mixing other colors together. They are the base colors that all other colors are derived from.\n\nRed is a warm color that is often associated with energy, passion, and love. It is",
+    "completion": "yellow. These colors are called primary because they cannot be created by mixing other colors together. They are the base colors that all other colors are derived from.\n\nRed is a warm color that is often associated with energy, passion, and love. It is",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "The primary colors are red, blue, and",
+      "tokens": [
+        "The",
+        "\u0120primary",
+        "\u0120colors",
+        "\u0120are",
+        "\u0120red",
+        ",",
+        "\u0120blue",
+        ",",
+        "\u0120and"
+      ],
+      "token_ids": [
+        128000,
+        791,
+        6156,
+        8146,
+        527,
+        2579,
+        11,
+        6437,
+        11,
+        323
+      ],
+      "decoded": "<|begin_of_text|>The primary colors are red, blue, and",
+      "is_reversible": false
+    },
+    "example_id": 4,
+    "parameters": {
+      "temperature": 0.0,
+      "do_sample": false
+    }
+  },
+  {
+    "prompt": "The primary colors are red, blue, and",
+    "error": "`temperature` (=0.0) has to be a strictly positive float, otherwise your next token scores will be invalid. If you're looking for greedy decoding strategies, set `do_sample=False`.",
+    "example_id": 4,
+    "parameters": {
+      "temperature": 0.0,
+      "do_sample": true
+    }
+  },
+  {
+    "prompt": "The primary colors are red, blue, and",
+    "expected_completion": "yellow",
+    "generated_text": "The primary colors are red, blue, and yellow. These colors are called primary because they cannot be created by mixing other colors together. They are the base colors that all other colors are derived from.\n\nRed is a warm color that is often associated with energy, passion, and love. It is",
+    "completion": "yellow. These colors are called primary because they cannot be created by mixing other colors together. They are the base colors that all other colors are derived from.\n\nRed is a warm color that is often associated with energy, passion, and love. It is",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "The primary colors are red, blue, and",
+      "tokens": [
+        "The",
+        "\u0120primary",
+        "\u0120colors",
+        "\u0120are",
+        "\u0120red",
+        ",",
+        "\u0120blue",
+        ",",
+        "\u0120and"
+      ],
+      "token_ids": [
+        128000,
+        791,
+        6156,
+        8146,
+        527,
+        2579,
+        11,
+        6437,
+        11,
+        323
+      ],
+      "decoded": "<|begin_of_text|>The primary colors are red, blue, and",
+      "is_reversible": false
+    },
+    "example_id": 4,
+    "parameters": {
+      "temperature": 0.7,
+      "do_sample": false
+    }
+  },
+  {
+    "prompt": "The primary colors are red, blue, and",
+    "expected_completion": "yellow",
+    "generated_text": "The primary colors are red, blue, and yellow. They are used to create a wide range of colors through various combinations and shades.\n\n## Step 1: Understanding the primary colors\nThe primary colors are the basic colors that cannot be created by mixing other colors together. They are the foundation of",
+    "completion": "yellow. They are used to create a wide range of colors through various combinations and shades.\n\n## Step 1: Understanding the primary colors\nThe primary colors are the basic colors that cannot be created by mixing other colors together. They are the foundation of",
+    "is_match": false,
+    "match_info": {
+      "exact_match": false,
+      "case_insensitive_match": false,
+      "contains_match": true,
+      "starts_with_match": true
+    },
+    "tokenizer_analysis": {
+      "tokenizer_name": "meta-llama/Llama-3.2-1B-Instruct",
+      "special_tokens": {
+        "pad_token": "<|eot_id|>",
+        "eos_token": "<|eot_id|>",
+        "bos_token": "<|begin_of_text|>",
+        "unk_token": null,
+        "mask_token": null
+      },
+      "input_text": "The primary colors are red, blue, and",
+      "tokens": [
+        "The",
+        "\u0120primary",
+        "\u0120colors",
+        "\u0120are",
+        "\u0120red",
+        ",",
+        "\u0120blue",
+        ",",
+        "\u0120and"
+      ],
+      "token_ids": [
+        128000,
+        791,
+        6156,
+        8146,
+        527,
+        2579,
+        11,
+        6437,
+        11,
+        323
+      ],
+      "decoded": "<|begin_of_text|>The primary colors are red, blue, and",
+      "is_reversible": false
+    },
+    "example_id": 4,
+    "parameters": {
+      "temperature": 0.7,
+      "do_sample": true
+    }
+  }
+]

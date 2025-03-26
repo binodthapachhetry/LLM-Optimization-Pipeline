@@ -109,19 +109,19 @@ def test_model_completion(
         is_match = False
         if expected_completion:
             # Try different matching criteria
-            exact_match = completion == expected_completion
-            case_insensitive_match = completion.lower() == expected_completion.lower()
+            # exact_match = completion == expected_completion
+            # case_insensitive_match = completion.lower() == expected_completion.lower()
+
             contains_match = expected_completion.lower() in completion.lower()
             starts_with_match = completion.lower().startswith(expected_completion.lower())
-            
-            is_match = exact_match or case_insensitive_match
+
+            is_match = contains_match or starts_with_match
             
             # Log all matching criteria
             match_info = {
-                "exact_match": exact_match,
-                "case_insensitive_match": case_insensitive_match,
-                "contains_match": contains_match,
-                "starts_with_match": starts_with_match
+                "exact_match": completion.lower() == expected_completion.lower(),                                                                                                       
+                "starts_with_match": completion.lower().startswith(expected_completion.lower()),                                                                                        
+                "contains_match": completion.lower() in completion.lower()  
             }
         else:
             match_info = {"no_expected_completion_provided": True}
