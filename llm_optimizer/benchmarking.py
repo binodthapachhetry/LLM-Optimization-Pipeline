@@ -14,6 +14,8 @@ import pandas as pd
 import matplotlib.pyplot as plt                                                                                                                                                       
 import seaborn as sns                                                                                                                                                                 
 from transformers import AutoTokenizer
+
+from llm_optimizer.utils.diagnostics import log_completion_evaluation, test_model_completion, analyze_tokenizer_behavior
                                                                                                                                                                                     
 from llm_optimizer.base import OptimizationStage                                                                                                                                      
 from llm_optimizer.utils.model import load_model_and_tokenizer
@@ -554,6 +556,12 @@ class BenchmarkingStage(OptimizationStage):
             Dictionary of quality benchmark results                                                                                                                                   
         """                                                                                                                                                                           
         try:
+            # Add diagnostic logging for quality benchmarking
+            logger.info("=== STARTING QUALITY BENCHMARKING ===")
+            logger.info(f"Optimized model type: {type(optimized_model).__name__}")
+            logger.info(f"Baseline model type: {type(baseline_model).__name__}")
+            
+            # Create a custom evaluator with diagnostic logging
             from llm_optimizer.evaluation import ModelEvaluator
             
             # Check if we should use bundled datasets
@@ -586,8 +594,15 @@ class BenchmarkingStage(OptimizationStage):
                     logger.warning(f"Error setting up bundled datasets: {e}")
                     logger.warning("Falling back to online datasets")
             
-            # Create evaluator                                                                                                                                                            
-            evaluator = ModelEvaluator(self.config)                                                                                                                                       
+            # Try to use the debug evaluator if available, otherwise fall back to regular evaluator
+            try:
+                from llm_optimizer.evaluation_debug import DebugModelEvaluator
+                logger.info("Using DebugModelEvaluator for enhanced diagnostics")
+                evaluator = DebugModelEvaluator(self.config)
+            except ImportError:
+                logger.info("Debug evaluator not available, using standard ModelEvaluator")
+                from llm_optimizer.evaluation import ModelEvaluator
+                evaluator = ModelEvaluator(self.config)
                                                                                                                                                                                     
             # Save models temporarily if needed                                                                                                                                           
             temp_dir = os.path.join(self.config.get("output_dir", "./outputs"), "temp")                                                                                                   

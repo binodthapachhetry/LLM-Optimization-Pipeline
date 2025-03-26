@@ -18,5 +18,25 @@
   {
     "prompt": "The primary colors are red, blue, and",
     "completion": "yellow"
+  },
+  {
+    "prompt": "Complete the following: The capital of France is",
+    "completion": "Paris"
+  },
+  {
+    "prompt": "Answer this question: What is the capital of France?",
+    "completion": "Paris"
+  },
+  {
+    "prompt": "Continue this sentence: Water boils at 100 degrees",
+    "completion": "Celsius"
+  },
+  {
+    "prompt": "Fill in the blank: The opposite of hot is ___.",
+    "completion": "cold"
+  },
+  {
+    "prompt": "What comes next? The primary colors are red, blue, and",
+    "completion": "yellow"
   }
 ]
