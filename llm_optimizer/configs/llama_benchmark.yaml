@@ -19,4 +19,5 @@ benchmark:
   evaluation:
     tasks: ["perplexity"]  # Tasks to evaluate
     dataset: "wikitext"  # Dataset for evaluation
-    max_samples: 100  # Maximum number of samples to evaluate
+    max_samples: 10  # Maximum number of samples to evaluate
+    max_sequence_length: 512

@@ -85,7 +85,21 @@ def load_model_and_tokenizer(
             trust_remote_code=True,                                                                                                                                                   
         )                                                                                                                                                                             
                                                                                                                                                                                     
-    logger.info(f"Model loaded successfully")                                                                                                                                         
+    logger.info(f"Model loaded successfully")  
+
+    # After loading the model and tokenizer                                                                                                                                           
+    if hasattr(tokenizer, 'pad_token') and tokenizer.pad_token is None:                                                                                                               
+        # Set a distinct pad token                                                                                                                                                    
+        if hasattr(tokenizer, 'eos_token'):                                                                                                                                           
+            # Option A: Use a different special token                                                                                                                                 
+            if hasattr(tokenizer, 'unk_token'):                                                                                                                                       
+                tokenizer.pad_token = tokenizer.unk_token                                                                                                                             
+            # Option B: Add a new special token                                                                                                                                       
+            else:                                                                                                                                                                     
+                tokenizer.add_special_tokens({'pad_token': '[PAD]'})                                                                                                                  
+                # Resize embeddings if it's a Hugging Face model                                                                                                                      
+                if hasattr(model, 'resize_token_embeddings'):                                                                                                                         
+                    model.resize_token_embeddings(len(tokenizer))                                                                                                                                         
                                                                                                                                                                                     
     return model, tokenizer                                                                                                                                                           
 

@@ -139,13 +139,15 @@ class ModelEvaluator(Evaluator):
             dataset = load_dataset(dataset_name, dataset_config, split="validation")                                                                                                  
         except Exception as e:                                                                                                                                                        
             logger.error(f"Failed to load dataset {dataset_name}/{dataset_config}: {e}")                                                                                              
-            return {"perplexity": float("nan")}                                                                                                                                       
-                                                                                                                                                                                    
+            return {"perplexity": float("nan")}   
+
+        # Get max sequence length from config                                                                                                                                             
+        max_length = self.config.get("evaluation", {}).get("max_sequence_length", 1024)                                                                                                   
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         # Tokenize dataset                                                                                                                                                            
-        encodings = tokenizer("\n\n".join(dataset["text"]), return_tensors="pt")                                                                                                      
+        encodings = tokenizer("\n\n".join(dataset["text"]), return_tensors="pt", max_length=max_length, truncation=True)                                                                                                      
                                                                                                                                                                                     
         # Calculate perplexity                                                                                                                                                        
-        max_length = self.config.get("max_length", 1024)                                                                                                                              
         stride = self.config.get("stride", 512)                                                                                                                                       
                                                                                                                                                                                     
         lls = []                                                                                                                                                                      
@@ -221,7 +223,7 @@ class ModelEvaluator(Evaluator):
                 dataset = dataset.select(range(max_samples))                                                                                                                          
                                                                                                                                                                                     
             correct = 0                                                                                                                                                               
-            total = 0                                                                                                                                                                 
+            total = 0   
                                                                                                                                                                                     
             for example in dataset:                                                                                                                                                   
                 text = example["text"]                                                                                                                                                
@@ -233,7 +235,7 @@ class ModelEvaluator(Evaluator):
                 context = text[:-len(last_word)].strip()                                                                                                                              
                                                                                                                                                                                     
                 # Tokenize                                                                                                                                                            
-                input_ids = tokenizer(context, return_tensors="pt").input_ids.to(model.device)                                                                                        
+                input_ids = tokenizer(context, return_tensors="pt").input_ids.to(model.device)                                                                                     
                                                                                                                                                                                     
                 # Generate                                                                                                                                                            
                 with torch.no_grad():                                                                                                                                                 
