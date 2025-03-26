@@ -20,8 +20,9 @@ from llm_optimizer.utils.model import load_model_and_tokenizer
 from llm_optimizer.utils.gguf_utils import load_gguf_model
 
 from rich.console import Console  
+from omegaconf import OmegaConf
 
-
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 console = Console() 
 
@@ -90,12 +91,12 @@ class BenchmarkingStage(OptimizationStage):
                 "optimized_model": {
                     "path": optimized_model_path,
                     "type": type(optimized_model).__name__,
-                    "device": getattr(optimized_model, "device", "unknown"),
+                    "device": str(getattr(optimized_model, "device", "unknown")),
                 },
                 "baseline_model": {
                     "path": baseline_model_path,
                     "type": type(baseline_model).__name__,
-                    "device": getattr(baseline_model, "device", "unknown"),
+                    "device": str(getattr(baseline_model, "device", "unknown")),
                 },
                 "benchmark_config": {
                     "sequence_lengths": self.config.get("sequence_lengths", [128, 512, 1024]),
@@ -674,12 +675,14 @@ class BenchmarkingStage(OptimizationStage):
         Returns:                                                                                                                                                                      
             Dictionary of report file paths                                                                                                                                           
         """                                                                                                                                                                           
-        os.makedirs(output_dir, exist_ok=True)                                                                                                                                        
+        os.makedirs(output_dir, exist_ok=True)      
+
+        serializable_results = OmegaConf.to_container(benchmark_results, resolve=True)                                                                                                                                   
                                                                                                                                                                                     
         # Save raw results                                                                                                                                                            
         results_path = os.path.join(output_dir, "benchmark_results.json")                                                                                                             
         with open(results_path, "w") as f:                                                                                                                                            
-            json.dump(benchmark_results, f, indent=2)                                                                                                                                 
+            json.dump(serializable_results, f, indent=2)                                                                                                                                 
                                                                                                                                                                                     
         # Generate summary report                                                                                                                                                     
         summary_path = os.path.join(output_dir, "benchmark_summary.txt")                                                                                                              
