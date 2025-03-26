@@ -1,4 +1,5 @@
-FROM python:3.10-slim                                                                                                                                                                 
+
+FROM nvcr.io/nvidia/pytorch:25.01-py3                                                                                                                                                                
                                                                                                                                                                                     
 WORKDIR /app                                                                                                                                                                          
                                                                                                                                                                                     
