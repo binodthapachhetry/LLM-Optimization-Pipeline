@@ -337,40 +337,50 @@ class BenchmarkingStage(OptimizationStage):
                     # Continue with benchmarking despite warm-up failure
                     break
                                                                                                                                                                                     
-            # Measure performance                                                                                                                                                         
-            torch.cuda.synchronize() if torch.cuda.is_available() else None                                                                                                               
-            start_time = time.time()
+            # Measure performance - collect individual latencies to avoid duplication                                                                                                                                                         
+            latencies = []
             
             # Track successful iterations
             successful_iterations = 0
                                                                                                                                                                                     
             for i in range(num_iterations):
                 try:
+                    # Synchronize before each iteration to get accurate per-iteration timing
+                    torch.cuda.synchronize() if torch.cuda.is_available() else None
+                    iter_start = time.time()
+                    
                     with torch.no_grad():                                                                                                                                                     
                         _ = model(input_ids)
+                        
+                    # Synchronize after iteration
+                    torch.cuda.synchronize() if torch.cuda.is_available() else None
+                    iter_end = time.time()
+                    
+                    # Record individual latency for this iteration
+                    iter_latency = (iter_end - iter_start) * 1000  # convert to ms
+                    latencies.append(iter_latency)
+                    
                     successful_iterations += 1
+                    
                 except Exception as e:
                     logger.error(f"Benchmark iteration {i} failed: {e}")
                     # Continue with remaining iterations
                                                                                                                                                                                     
-            torch.cuda.synchronize() if torch.cuda.is_available() else None                                                                                                               
-            end_time = time.time()                                                                                                                                                        
-                                                                                                                                                                                    
             # Calculate metrics - handle case where all iterations failed                                                                                                                                                                           
-            total_time = end_time - start_time
-            
             if successful_iterations == 0:
                 logger.error("All benchmark iterations failed")
                 return float('inf'), 0.0  # Indicate failure with infinite latency and zero throughput
                 
-            # Calculate based on successful iterations only
-            latency_ms = (total_time / successful_iterations) * 1000                                                                                                                             
-            throughput = (batch_size * successful_iterations) / total_time
+            # Calculate average latency from individual measurements
+            avg_latency_ms = sum(latencies) / len(latencies)
             
-            logger.info(f"Performance: {latency_ms:.2f}ms latency, {throughput:.2f} samples/sec "
+            # Calculate throughput based on average latency
+            throughput = (batch_size * 1000) / avg_latency_ms
+            
+            logger.info(f"Performance: {avg_latency_ms:.2f}ms latency, {throughput:.2f} samples/sec "
                        f"({successful_iterations}/{num_iterations} successful iterations)")
                                                                                                                                                                                     
-            return latency_ms, throughput
+            return avg_latency_ms, throughput
             
         except Exception as e:
             logger.error(f"Performance measurement failed: {e}")

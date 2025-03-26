@@ -8,6 +8,7 @@ import logging
 import tempfile
 from typing import Tuple, Optional, Union
 import requests
+import torch
 from huggingface_hub import hf_hub_download, HfApi
 from llama_cpp import Llama
 from llm_optimizer.utils.model import GGUFModelWrapper, GGUFTokenizerWrapper
