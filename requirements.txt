@@ -9,9 +9,11 @@ optimum==1.24.0
 onnx==1.17.0                                                                                                                                                                          
 onnxruntime==1.21.0 
 dspy-ai==2.6.12
-llama-cpp-python==0.3.7  # Added for GGUF model support
 huggingface-hub==0.29.3  # For downloading models from HF
 requests==2.32.3  # For downloading files
+
+#llama-cpp-python==0.3.7  # Added for GGUF model support
+
                                                                                                                                                                                     
 # Evaluation and metrics                                                                                                                                                              
 evaluate==0.4.3                                                                                                                                                                       

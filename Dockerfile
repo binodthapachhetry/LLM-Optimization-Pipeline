@@ -29,8 +29,12 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install llama-cpp-python with CUDA support
-RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc" pip install --force-reinstall llama-cpp-python==0.3.7
+# setting build related env vars
+ENV CUDA_DOCKER_ARCH=all
+ENV GGML_CUDA=1
+# Install llama-cpp-python (build with cuda)
+RUN CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python
+
 
 # Create .dockerignore if it doesn't exist
 COPY .dockerignore* ./

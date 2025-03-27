@@ -1,6 +1,4 @@
-# LLM-Optimization-Pipeline                                                                                                                                                           
- This covers everything from initial testing and evaluation to fine-tuning and subsequent optimizations such as compression and distillation.                                          
- =======                                                                                                                                                                               
+                                                                                                                                                                             
  # LLM-Optimization-Pipeline                                                                                                                                                           
                                                                                                                                                                                        
 A comprehensive modular pipeline for optimizing Large Language Models (LLMs) after training. This framework covers everything from initial testing and evaluation to fine-tuning and  
