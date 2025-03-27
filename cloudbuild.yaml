@@ -1,0 +1,101 @@
+# Google Cloud Build configuration for LLM Optimizer                                                                                                                                  
+ steps:                                                                                                                                                                                
+   # Step 1: Build the Docker image with GPU support                                                                                                                                   
+   - name: 'gcr.io/cloud-builders/docker'                                                                                                                                              
+     id: 'build'                                                                                                                                                                       
+     env:                                                                                                                                                                              
+       - 'DOCKER_BUILDKIT=1'                                                                                                                                                           
+       - 'CUDA_DOCKER_ARCH=all'                                                                                                                                                        
+       - 'GGML_CUDA=1'                                                                                                                                                                 
+     args: [                                                                                                                                                                           
+       'build',                                                                                                                                                                        
+       '-t', 'us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:latest',                                                                                              
+       '--build-arg', 'CUDA_VISIBLE_DEVICES=all',                                                                                                                                      
+       '--build-arg', 'TORCH_CUDA_ARCH_LIST=7.0;7.5;8.0;8.6',                                                                                                                          
+       '.'                                                                                                                                                                             
+     ]                                                                                                                                                                                 
+     timeout: '3600s'  # 1 hour timeout for build                                                                                                                                      
+                                                                                                                                                                                       
+   # Step 2: Tag with build ID for versioning                                                                                                                                          
+   - name: 'gcr.io/cloud-builders/docker'                                                                                                                                              
+     id: 'tag'                                                                                                                                                                         
+     waitFor: ['build']                                                                                                                                                                
+     args: [                                                                                                                                                                           
+       'tag',                                                                                                                                                                          
+       'us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:latest',                                                                                                    
+       'us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:$BUILD_ID'                                                                                                  
+     ]                                                                                                                                                                                 
+                                                                                                                                                                                       
+   # Step 3: Push the latest version                                                                                                                                                   
+   - name: 'gcr.io/cloud-builders/docker'                                                                                                                                              
+     id: 'push-latest'                                                                                                                                                                 
+     waitFor: ['tag']                                                                                                                                                                  
+     args: ['push', 'us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:latest']                                                                                       
+     timeout: '1800s'  # 30 minute timeout for push                                                                                                                                    
+                                                                                                                                                                                       
+   # Step 4: Push the tagged version                                                                                                                                                   
+   - name: 'gcr.io/cloud-builders/docker'                                                                                                                                              
+     id: 'push-tagged'                                                                                                                                                                 
+     waitFor: ['tag']                                                                                                                                                                  
+     args: ['push', 'us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:$BUILD_ID']                                                                                    
+     timeout: '1800s'  # 30 minute timeout for push                                                                                                                                    
+                                                                                                                                                                                       
+   # Step 5: Test the built image                                                                                                                                                      
+   - name: 'us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:latest'                                                                                                 
+     id: 'test'                                                                                                                                                                        
+     waitFor: ['push-latest']                                                                                                                                                          
+     args: ['--help']                                                                                                                                                                  
+     timeout: '60s'                                                                                                                                                                    
+                                                                                                                                                                                       
+   # Step 6: Scan for vulnerabilities                                                                                                                                                  
+   - name: 'gcr.io/cloud-builders/gcloud'                                                                                                                                              
+     id: 'scan'                                                                                                                                                                        
+     waitFor: ['push-latest']                                                                                                                                                          
+     args: [                                                                                                                                                                           
+       'artifacts', 'docker', 'images', 'scan',                                                                                                                                        
+       'us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:latest',                                                                                                    
+       '--format=json',                                                                                                                                                                
+       '--quiet'                                                                                                                                                                       
+     ]                                                                                                                                                                                 
+     timeout: '300s'                                                                                                                                                                   
+                                                                                                                                                                                       
+   # Step 7: Print success message and usage instructions                                                                                                                              
+   - name: 'gcr.io/cloud-builders/gcloud'                                                                                                                                              
+     id: 'success'                                                                                                                                                                     
+     waitFor: ['test', 'scan', 'push-tagged']                                                                                                                                          
+     entrypoint: 'bash'                                                                                                                                                                
+     args:                                                                                                                                                                             
+       - '-c'                                                                                                                                                                          
+       - |                                                                                                                                                                             
+         echo "Build completed successfully!"                                                                                                                                          
+         echo "Your image is available at: us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:latest"                                                                  
+         echo "Tagged version: us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:$BUILD_ID"                                                                           
+         echo ""                                                                                                                                                                       
+         echo "To run the container with GPU support:"                                                                                                                                 
+         echo "gcloud compute instances create-with-container llm-optimizer-vm \\                                                                                                      
+               --container-image us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:latest \\                                                                          
+               --machine-type=n1-standard-8 \\                                                                                                                                         
+               --accelerator=type=nvidia-tesla-t4,count=1 \\                                                                                                                           
+               --boot-disk-size=100GB \\                                                                                                                                               
+               --maintenance-policy=TERMINATE \\                                                                                                                                       
+               --container-command=llm-optimizer \\                                                                                                                                    
+               --container-arg=benchmark \\                                                                                                                                            
+               --container-arg=--config=llm_optimizer/configs/llama_benchmark.yaml"                                                                                                    
+                                                                                                                                                                                       
+ # Build configuration options                                                                                                                                                         
+ options:                                                                                                                                                                              
+   machineType: 'N1_HIGHCPU_32_NVIDIA_TESLA_T4'  # Use a high-CPU machine with GPU for the build                                                                                       
+   diskSizeGb: 100  # Allocate 100GB disk for the build                                                                                                                                
+   dynamicSubstitutions: true                                                                                                                                                          
+   substitutionOption: 'ALLOW_LOOSE'                                                                                                                                                   
+   env:                                                                                                                                                                                
+     - 'DOCKER_BUILDKIT=1'                                                                                                                                                             
+                                                                                                                                                                                       
+ # Specify artifacts to store                                                                                                                                                          
+ artifacts:                                                                                                                                                                            
+   images:                                                                                                                                                                             
+     - 'us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:latest'                                                                                                     
+     - 'us-east4-docker.pkg.dev/$PROJECT_ID/llm-optimizer/llm-optimizer:$BUILD_ID'                                                                                                  
+                                                                                                                                                                                       
+ # Timeout for the entire build                                                                                                                                                        
+ timeout: '3600s'  # 1 hour total timeout  

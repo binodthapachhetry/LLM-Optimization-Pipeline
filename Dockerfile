@@ -1,6 +1,9 @@
 # Base image with PyTorch and CUDA 12.8.0
 FROM nvcr.io/nvidia/pytorch:25.01-py3
 
+# Add this line BEFORE installing other dependencies
+ENV TRITON_SKIP_INSTALL=1
+
 # Set working directory
 WORKDIR /app
 
